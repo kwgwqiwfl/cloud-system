@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO" monitorInterval="20">
+    <Properties>
+        <Property name="APP_NAME">cloud-ml</Property>
+        <Property name="LOG_DIR">./logs</Property>
+        <Property name="LOG_FILE"><![CDATA[${LOG_DIR}/${APP_NAME}.log]]></Property>
+        <Property name="LOG_LEVEL_PATTERN"><![CDATA[%5p]]></Property>
+        <Property name="LOG_PATTERN">
+            <![CDATA[[%d{yyyy-MM-dd HH:mm:ss.SSS}{GMT+8}] %X{pid} %5p [%t] --- %c{1}: %m%n %throwable{1000}]]></Property>
+    </Properties>
+    <Appenders>
+        <!-- 控制台输出（保留） -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+
+        <!-- 核心日志文件：logs/cloud-ml.log，保存30天，每日滚动，250MB分片 -->
+        <RollingFile name="Rolling_file" immediateFlush="true"
+                     fileName="${LOG_FILE}"
+                     filePattern="${LOG_FILE}.%d{yyyy-MM-dd}-%i">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="250 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy fileIndex="nomax">
+                <Delete basePath="${LOG_DIR}">
+                    <IfFileName glob="${LOG_FILE}*"/>
+                    <IfLastModified age="30d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="Rolling_file"/>
+        </Root>
+
+        <!-- 以下日志级别定义完全保留，不做任何修改 -->
+        <Logger name="java.sql" level="DEBUG"/>
+        <Logger name="com.merce" level="DEBUG"/>
+        <Logger name="com.ring.welkin" level="INFO"/>
+        <Logger name="org.springframework" level="INFO"/>
+        <Logger name="org.springframework.scheduling" level="INFO"/>
+
+        <!-- hibernate日志输出 -->
+        <Logger name="org.hibernate" level="DEBUG"/>
+        <Logger name="org.hibernate.type.descriptor.sql.BasicBinder"
+                level="DEBUG"/>
+        <Logger name="org.hibernate.type.descriptor.sql.BasicExtractor"
+                level="DEBUG"/>
+        <Logger name="org.hibernate.SQL" level="DEBUG"/>
+        <Logger name="org.hibernate.engine.QueryParameters"
+                level="DEBUG"/>
+        <Logger name="org.hibernate.engine.query.HQLQueryPlan"
+                level="DEBUG"/>
+
+        <Logger name="reactor" level="ERROR"/>
+        <Logger name="io.undertow" level="ERROR"/>
+        <Logger name="io.netty" level="ERROR"/>
+        <Logger name="net.openhft" level="ERROR"/>
+        <Logger name="net.sf" level="ERROR"/>
+        <Logger name="org.hibernate" level="ERROR"/>
+        <Logger name="com.zaxxer" level="ERROR"/>
+        <Logger name="org.apache" level="ERROR"/>
+        <Logger name="org.reflections" level="ERROR"/>
+        <Logger name="io.swagger" level="ERROR"/>
+        <Logger name="org.quartz" level="ERROR"/>
+        <Logger name="com.netflix" level="ERROR"/>
+        <Logger name="org.mybatis" level="ERROR"/>
+        <Logger name="org.apache.ibatis" level="ERROR"/>
+        <Logger name="tk.mybatis" level="ERROR"/>
+        <Logger name="java.nio" level="ERROR"/>
+        <Logger name="sun.nio" level="ERROR"/>
+        <Logger name="org.xnio" level="ERROR"/>
+        <Logger name="io.lettuce" level="ERROR"/>
+        <logger name="com.zaxxer.hikari" level="ERROR"/>
+        <logger name="io.searchbox" level="ERROR"/>
+        <logger name="springfox.documentation" level="ERROR"/>
+        <Logger name="com.alibaba" level="OFF"/>
+        <logger name="com.gargoylesoftware" level="OFF"/>
+        <logger name="net.sourceforge.htmlunit" level="OFF"/>
+        <logger name="DefaultJavaScriptErrorListener" level="OFF"/>
+        <logger name="ContextHandler" level="OFF"/>
+    </Loggers>
+</Configuration>

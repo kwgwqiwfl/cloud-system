@@ -6,16 +6,8 @@ import lombok.ToString;
 @Getter
 @ToString
 public enum TaskTypeEnum {
-    FULL("全量"),
-    UPDATE("更新");
+    IP_DOMAIN_NORMAL,//正常轮询模式
+    IP_DOMAIN_SMALL,//小ip 单任务模式
+    IP_DOMAIN_LARGE;//大IP分段模式
 
-    private final String taskType;
-
-    TaskTypeEnum(String taskType) {
-        this.taskType = taskType;
-    }
-
-    public String getTaskType() {
-        return taskType;
-    }
 }

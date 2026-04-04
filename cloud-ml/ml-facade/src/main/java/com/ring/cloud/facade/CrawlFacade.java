@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import tk.mybatis.spring.annotation.MapperScan;
 
@@ -19,6 +20,7 @@ import java.util.TimeZone;
 @SpringBootApplication
 @EnableDiscoveryClient
 @EnableTransactionManagement
+@EnableScheduling
 @ComponentScan(basePackages = {"com.ring.cloud", "com.ring.welkin","com.ring.welkin.**.pojo","com.ring.welkin.**.entity"})
 @EntityScan(basePackages = {"com.ring.cloud.**.pojo","com.ring.cloud.**.entity"})
 @MapperScan(basePackages = {"com.ring.cloud.core.**.mapper", "com.ring.welkin.data.**.mapper"})

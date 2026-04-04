@@ -1,7 +1,7 @@
 package com.ring.cloud.facade.service;
 
 import com.ring.cloud.core.service.IpDomainService;
-import com.ring.cloud.facade.config.IpSegmentSplitConfig;
+import com.ring.cloud.facade.common.TaskFactory;
 import com.ring.cloud.facade.crawl.ProxyUtil;
 import com.ring.cloud.facade.entity.proxy.ProxyIp;
 import com.ring.cloud.facade.entity.proxy.ProxyResponse;
@@ -24,7 +24,7 @@ public abstract class SeaCommon {
     @Autowired
     protected TaskHandlerExecutor handlerExecutor;
     @Autowired
-    protected IpSegmentSplitConfig ipSegmentSplitConfig;
+    protected TaskFactory factory;
 
     public List<ProxyIp> getProxy() {
         if(proxyUrl.length()<5)

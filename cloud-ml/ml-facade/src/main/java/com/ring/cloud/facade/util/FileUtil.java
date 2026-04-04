@@ -9,10 +9,19 @@ public class FileUtil {
 	public static final String fileNameConnector = "_"; //文件名连接符
 
 	//生成ip csv文件地址 路径加名称
-	public static String ipCsvFileName(String path, String ipFileNamePrefix, int seg) {
+	public static String ipCsvFileName(String path, String ipFileNamePrefix, String seg) {
 		// 2. 跨平台路径拼接（自动适配Windows/Linux/Mac）
 		File baseDir = new File(path);
 		File csvFile = new File(baseDir, ipFileNamePrefix + fileNameConnector + seg + ".csv");
+
+		// 3. 返回标准化路径（自动处理分隔符、冗余斜杠等）
+		return csvFile.getAbsolutePath();
+	}
+	//生成ip csv文件地址 路径加名称
+	public static String ipCsvFileName(String path, String fileName) {
+		// 2. 跨平台路径拼接（自动适配Windows/Linux/Mac）
+		File baseDir = new File(path);
+		File csvFile = new File(baseDir, fileName);
 
 		// 3. 返回标准化路径（自动处理分隔符、冗余斜杠等）
 		return csvFile.getAbsolutePath();

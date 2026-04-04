@@ -2,15 +2,13 @@ package com.ring.cloud.facade.config;
 
 import com.ring.cloud.facade.entity.ip.PangRequest;
 import com.ring.cloud.facade.entity.proxy.ProxyIp;
-import com.ring.cloud.facade.frame.RestProxyBase;
+import com.ring.cloud.facade.frame.OkProxyBase;
 import com.ring.cloud.facade.frame.RetryTemplate;
 import com.ring.cloud.facade.util.IpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 
@@ -20,9 +18,7 @@ public class PangIpServcie {
     @Autowired
     private RetryTemplate retryTemplate;
     @Autowired
-    protected RestProxyBase restProxyBase;
-    @Autowired
-    private ProxyPoolManager proxyPoolManager;
+    protected OkProxyBase okProxyBase;
 
     @Value("${ml.client.desc.ip.pangzhan:null}")
     protected String ipPangUrl;
@@ -45,15 +41,13 @@ public class PangIpServcie {
     public List<String> crawlPang(PangRequest request) {
         ProxyIp proxy = request.getProxy();
         String url = IpUtil.buildPangUrl(request.getCurrentIp(), ipPangUrl);
-        RestTemplate restTemplate = restProxyBase.createWebClient(proxy.getIp(), proxy.getPort());
-        String xmlContent = restProxyBase.doProxyRequest(restTemplate, url, "");
+        String xmlContent = okProxyBase.doProxyRequest(proxy.getIp(), proxy.getPort(), url, "");
         return IpUtil.parsePangValidIps(xmlContent);
     }
 
     public List<String> pangIpsNoRetry(String currentIp, ProxyIp proxy) {
         String url = IpUtil.buildPangUrl(currentIp, ipPangUrl);
-        RestTemplate restTemplate = restProxyBase.createWebClient(proxy.getIp(), proxy.getPort());
-        String xmlContent = restProxyBase.doProxyRequest(restTemplate, url, "");
+        String xmlContent = okProxyBase.doProxyRequest(proxy.getIp(), proxy.getPort(), url, "");
         return IpUtil.parsePangValidIps(xmlContent);
     }
 

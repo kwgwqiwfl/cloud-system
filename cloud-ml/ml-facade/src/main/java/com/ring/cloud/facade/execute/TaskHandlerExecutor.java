@@ -1,5 +1,7 @@
 package com.ring.cloud.facade.execute;
 
+import com.ring.cloud.facade.common.TaskFactory;
+import com.ring.cloud.facade.config.IpGlobalProgressManager;
 import com.ring.cloud.facade.entity.ip.IpTaskEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -21,9 +23,21 @@ public class TaskHandlerExecutor extends AbstractHandlerExecutor {
 //            execute(new JobStateHandler(taskExecution), DateUtil.FLOW_METRIC_INTERVAL, latch);
 //    }
 
-    public void execHandler(IpTaskEntity ipTaskEntity){
+    public void execHandler(TaskFactory factory, IpGlobalProgressManager progressManager, IpTaskEntity ipTaskEntity){
 //        log.debug("start get job state.....");
-            execute(new TaskHandler(ipTaskEntity));
+            execute(new TaskHandler(factory, progressManager, ipTaskEntity));
+    }
+
+    /**
+     * 判断队列是否还能容纳指定数量的任务
+     * 保证大IP任务要么全进，要么全不进
+     */
+    public boolean canAccept(int taskCount) {
+        if (threadPoolTaskExecutor == null) {
+            return false;
+        }
+        int remaining = threadPoolTaskExecutor.getThreadPoolExecutor().getQueue().remainingCapacity();
+        return remaining >= taskCount;
     }
 
 }

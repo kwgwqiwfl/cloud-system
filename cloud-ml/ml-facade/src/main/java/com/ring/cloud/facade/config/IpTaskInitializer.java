@@ -18,7 +18,7 @@ public class IpTaskInitializer implements Initializer {
 
     @Override
     public void init() {
-        log.info("初始化开始");
+//        log.info("初始化开始");
     }
 
 //    @Transactional(rollbackOn = Exception.class)

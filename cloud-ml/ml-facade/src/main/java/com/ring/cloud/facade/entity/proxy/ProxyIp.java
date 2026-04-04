@@ -7,4 +7,5 @@ import lombok.Data;
 public class ProxyIp {
     private String ip;
     private int port;
+    private long createTime;
 }

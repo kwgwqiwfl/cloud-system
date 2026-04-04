@@ -21,7 +21,7 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = true)
 @ApiModel
 @Entity
-@Table(name = "source_ip_domain")
+@Table(name = "ip_domain")
 @Comment("ip-domain源表")
 public class SourceIpDomain extends AbstractStar {
 

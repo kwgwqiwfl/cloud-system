@@ -7,9 +7,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.apache.ibatis.type.JdbcType;
 import org.hibernate.annotations.Comment;
-import tk.mybatis.mapper.annotation.ColumnType;
 
 import javax.persistence.*;
 
@@ -23,14 +21,10 @@ public abstract class AbstractStar implements Idable<Long>, PreEntity {
 
     private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty(
-            value = "主键",
-            accessMode = ApiModelProperty.AccessMode.READ_ONLY
-    )
+    @ApiModelProperty(value = "主键", accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     @Comment("主键ID")
     @Id
-    @Column(length = 50)
-    @ColumnType(jdbcType = JdbcType.BIGINT)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Long id;
 
 }

@@ -10,6 +10,7 @@ import org.jsoup.select.Elements;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -41,7 +42,7 @@ public class IpUtil {
         return ipDomainUrl + "/" + ipPageInfix + "/?ip=" + ip + "&page=" + page + "&token=" + dynamicToken;
     }
 
-    //生成ip pangzhan url="//https://chapangzhan.com/3.1.1.0/24";
+    //生成ip pangzhan url="https://chapangzhan.com/3.1.1.0/24";
     public static String buildPangUrl(String ip, String ipPangUrl) {
         return ipPangUrl + "/" + ip + "/24";
     }
@@ -260,10 +261,42 @@ public class IpUtil {
             String startIp = currentSeg + ".0.0.0";
             String endIp = currentSeg + ".255.255.255";
 
-            list.add(new IpSegment(currentSeg, startIp, endIp));
+            list.add(new IpSegment(String.valueOf(currentSeg), startIp, endIp));
         }
 
         return list;
+    }
+
+    /**
+     * 根据 currentIp 生成第四位 0~255 的固定IP列表
+     * currentIp 第四位必须是 0，如 192.168.1.0
+     */
+    public static List<String> generateFixedIpList(String currentIp) {
+        if (currentIp == null || !currentIp.endsWith(".0")) {
+            return Collections.emptyList();
+        }
+
+        // 截取掉最后一位 0，拿到前缀 如 3.2.1.
+        String prefix = currentIp.substring(0, currentIp.lastIndexOf(".") + 1);
+        List<String> ipList = new ArrayList<>(256);
+
+        // 生成 0 ~ 255
+        for (int i = 0; i < 256; i++) {
+            ipList.add(prefix + i);
+        }
+
+        return ipList;
+    }
+
+    /**
+     * 从IP中只取【第一段】作为段号，直接返回 String
+     * 例如：10.0.1.10 → 返回 "10"
+     */
+    public static String getSegNoByIp(String ip) {
+        if (ip == null || ip.trim().isEmpty()) {
+            throw new IllegalArgumentException("IP 不能为空");
+        }
+        return ip.split("\\.")[0]; // 只取第一段，直接返回String
     }
 
     public static void main(String[] args) {

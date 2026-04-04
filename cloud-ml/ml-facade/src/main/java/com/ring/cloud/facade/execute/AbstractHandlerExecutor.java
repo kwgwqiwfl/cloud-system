@@ -9,7 +9,7 @@ import java.util.concurrent.CountDownLatch;
 @Slf4j
 public abstract class AbstractHandlerExecutor {
     
-    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
+    protected ThreadPoolTaskExecutor threadPoolTaskExecutor;
     
     public AbstractHandlerExecutor(ThreadPoolTaskExecutor threadPoolTaskExecutor) {
         this.threadPoolTaskExecutor = threadPoolTaskExecutor;

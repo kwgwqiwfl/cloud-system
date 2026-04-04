@@ -62,6 +62,7 @@ public class ProxyApiClient {
                     ProxyIp proxyIp = new ProxyIp();
                     proxyIp.setIp(arr[0]);
                     proxyIp.setPort(Integer.parseInt(arr[1]));
+                    proxyIp.setCreateTime(System.currentTimeMillis());
                     return proxyIp;
                 })
                 .collect(Collectors.toList());

@@ -30,7 +30,7 @@ public class OkProxyBase {
 //    private static final Random RANDOM = new Random(System.nanoTime());
 
     private static final int CONNECT_TIMEOUT = 3000;
-    private static final int READ_TIMEOUT = 8500;
+    private static final int READ_TIMEOUT = 8000;
     private static final int MAX_GZIP_SIZE = 10 * 1024 * 1024;
 
     private static final Headers BROWSER_HEADERS;
@@ -40,7 +40,8 @@ public class OkProxyBase {
                 "Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
                 "Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8",
                 "Accept-Encoding", "gzip, deflate, br",
-                "Connection", "keep-alive",
+//                "Connection", "keep-alive",
+                "Connection", "close",//查mix优化
                 "Upgrade-Insecure-Requests", "1",
                 "Sec-Fetch-Dest", "document",
                 "Sec-Fetch-Mode", "navigate",
@@ -183,8 +184,7 @@ public class OkProxyBase {
                 // 随机 1200~2200 毫秒，更像真人
                 Thread.sleep(1200 + new Random().nextInt(1000));
             }else {
-                // 其他站点 → 极短延迟 50~150ms
-                Thread.sleep(50 + ThreadLocalRandom.current().nextInt(100));
+                Thread.sleep(20 + ThreadLocalRandom.current().nextInt(40));//mix优化
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

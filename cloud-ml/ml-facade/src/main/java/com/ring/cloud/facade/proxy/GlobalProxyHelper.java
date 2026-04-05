@@ -17,9 +17,9 @@ public class GlobalProxyHelper {
     public ProxyIp getAvailableProxy() {
         ProxyIp proxy = proxyPoolManager.takeProxy();
         while (proxy == null) {
-            log.debug("代理获取失败，1秒后重试");
+            log.debug("代理获取失败，50毫秒后重试");
             try {
-                Thread.sleep(1000);
+                Thread.sleep(50);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }

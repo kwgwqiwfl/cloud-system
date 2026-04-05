@@ -143,6 +143,14 @@ public abstract class IpBaseExecutor {
         }
         return null;
     }
+    //token和loc
+    protected IpReadInfo parseTokenAndLoc(String xml) {
+        IpReadInfo info = new IpReadInfo();
+        Document doc = Jsoup.parse(xml);
+        info.setToken(parseToken(doc.select("script[type='text/javascript']")));
+        info.setLoc(doc.getElementsByClass("result result2").select("h3").text());
+        return info;
+    }
 
     protected void appendCsvRow(StringBuilder batchSb, String domain, String ip, String loc, String addTime, String upTime) {
         batchSb.append(ip)

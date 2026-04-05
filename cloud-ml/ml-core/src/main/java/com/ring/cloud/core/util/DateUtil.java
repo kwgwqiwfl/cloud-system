@@ -40,12 +40,12 @@ public class DateUtil {
         } catch (Exception ignored) {}
 
         try {
-            // 第二种格式：20240406 ← 你文件里的坑
+            // 第二种格式：20240406
             return Date.from(LocalDate.parse(val, FMT2).atStartOfDay(ZoneId.systemDefault()).toInstant());
         } catch (Exception ignored) {}
 
-        // 都解析失败才返回 null
-        return null;
+        // 都解析失败才返回 今天
+        return today();
     }
 
 }

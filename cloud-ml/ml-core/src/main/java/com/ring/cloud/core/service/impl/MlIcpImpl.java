@@ -51,21 +51,22 @@ public class MlIcpImpl extends EntityClassServiceImpl<MlIcp> implements MlIcpSer
 
     @Override
     public void batchSaveOrUpdate(List<MlIcp> list) {
-        Date today = DateUtil.today();
-        for (MlIcp icp : list) {
-            MlIcp exist = mapper.selectByDomain(icp.getDomain());
-            if (exist == null) {
-                icp.setCreateTime(today);
-                icp.setUpdateTime(today);
-                icp.setQueryCount(1);
-                mapper.insertSelective(icp);
-            } else {
-                if (DateUtil.isDifferentMonth(exist.getUpdateTime())) {
-                    exist.setQueryCount(exist.getQueryCount() + 1);
-                }
-                exist.setUpdateTime(today);
-                mapper.updateByPrimaryKeySelective(exist);
-            }
-        }
+        mapper.batchSaveOrUpdate(list);
+//        Date today = DateUtil.today();
+//        for (MlIcp icp : list) {
+//            MlIcp exist = mapper.selectByDomain(icp.getDomain());
+//            if (exist == null) {
+//                icp.setCreateTime(today);
+//                icp.setUpdateTime(today);
+//                icp.setQueryCount(1);
+//                mapper.insertSelective(icp);
+//            } else {
+//                if (DateUtil.isDifferentMonth(exist.getUpdateTime())) {
+//                    exist.setQueryCount(exist.getQueryCount() + 1);
+//                }
+//                exist.setUpdateTime(today);
+//                mapper.updateByPrimaryKeySelective(exist);
+//            }
+//        }
     }
 }

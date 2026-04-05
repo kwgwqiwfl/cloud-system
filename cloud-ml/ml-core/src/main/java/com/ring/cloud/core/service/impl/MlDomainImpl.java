@@ -50,21 +50,22 @@ public class MlDomainImpl extends EntityClassServiceImpl<MlDomain> implements Ml
     }
     @Override
     public void batchSaveOrUpdate(List<MlDomain> list) {
-        Date today = DateUtil.today();
-        for (MlDomain domain : list) {
-            MlDomain exist = mapper.selectByDomain(domain.getDomain());
-            if (exist == null) {
-                domain.setCreateTime(today);
-                domain.setUpdateTime(today);
-                domain.setQueryCount(1);
-                mapper.insertSelective(domain);
-            } else {
-                if (DateUtil.isDifferentMonth(exist.getUpdateTime())) {
-                    exist.setQueryCount(exist.getQueryCount() + 1);
-                }
-                exist.setUpdateTime(today);
-                mapper.updateByPrimaryKeySelective(exist);
-            }
-        }
+        mapper.batchSaveOrUpdate(list);
+//        Date today = DateUtil.today();
+//        for (MlDomain domain : list) {
+//            MlDomain exist = mapper.selectByDomain(domain.getDomain());
+//            if (exist == null) {
+//                domain.setCreateTime(today);
+//                domain.setUpdateTime(today);
+//                domain.setQueryCount(1);
+//                mapper.insertSelective(domain);
+//            } else {
+//                if (DateUtil.isDifferentMonth(exist.getUpdateTime())) {
+//                    exist.setQueryCount(exist.getQueryCount() + 1);
+//                }
+//                exist.setUpdateTime(today);
+//                mapper.updateByPrimaryKeySelective(exist);
+//            }
+//        }
     }
 }

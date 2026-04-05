@@ -9,8 +9,6 @@ import com.ring.cloud.facade.entity.proxy.ProxyIp;
 import com.ring.cloud.facade.execute.IpDomain.IpBaseExecutor;
 import com.ring.cloud.facade.util.IpUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -31,7 +29,7 @@ public class IpNormalCrawlExecutor extends IpBaseExecutor {
         boolean hasMore = false;
 
         String tempXml = ipFirstPage(proxy, IpUtil.buildIpUrlFirst(currentIp, ipDomainUrl));
-        IpReadInfo tempInfo = parseTokenOnly(tempXml);
+        IpReadInfo tempInfo = parseTokenAndLoc(tempXml);
 
         // 首页
         IpReadInfo firstInfo;
@@ -75,14 +73,6 @@ public class IpNormalCrawlExecutor extends IpBaseExecutor {
 
         finalReadInfo.setSuccess(true);
         return finalReadInfo;
-    }
-
-    private IpReadInfo parseTokenOnly(String xml) {
-        IpReadInfo info = new IpReadInfo();
-        Document doc = Jsoup.parse(xml);
-        info.setToken(parseToken(doc.select("script[type='text/javascript']")));
-        info.setLoc(doc.getElementsByClass("result result2").select("h3").text());
-        return info;
     }
 
     private boolean isLargeIp(String ip, ProxyIp proxy, String token) {

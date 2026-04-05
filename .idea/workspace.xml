@@ -10,185 +10,41 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="67ee9909-0982-4023-aaee-2afa21754d4d" name="Changes" comment="feat():">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/entity/ip/CommonPageQuery.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/entity/ip/IpDomainPageQuery.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/frame/IpRouteInit.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/frame/PageQueryDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/frame/PageResult.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/mybatis/mapper/IpRouteMapper.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/mybatis/mapper/MlDomainMapper.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/mybatis/mapper/MlIcpMapper.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/mybatis/mapper/MlIpMapper.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/mybatis/mapper/MlSubdomainMapper.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/pojo/IpRouteConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/pojo/MlDomain.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/pojo/MlIcp.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/pojo/MlIp.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/pojo/MlSubdomain.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/service/IpRouteService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/service/MlDomainService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/service/MlIcpService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/service/MlIpService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/service/MlSubdomainService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/service/impl/IpRouteImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/service/impl/MlDomainImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/service/impl/MlIcpImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/service/impl/MlIpImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/service/impl/MlSubdomainImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/util/DateUtil.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/util/IpCoreUtils.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/config/IpGlobalProgressManager.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/config/MixIpQuerySchedule.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/config/WebSocketConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/controller/IpQueryController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/controller/MixIpQueryController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/entity/ip/IpGlobalProgress.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/entity/ip/IpImport.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/entity/ip/MixIpInfo.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/execute/IpDomain/IpBaseExecutor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/execute/IpDomain/impl/IpLargeIpExecutor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/execute/IpDomain/impl/IpNormalCrawlExecutor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/execute/IpDomain/impl/IpPageCheckHelper.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/execute/IpDomain/impl/IpSmallExecutor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/execute/IpDomain/impl/MixIpExecutor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/frame/OkProxyBase.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/process/metrics/impl/IpDomainLarge.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/process/metrics/impl/IpDomainNormal.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/process/metrics/impl/IpDomainSmall.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/proxy/GlobalProxyHelper.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/service/IpDomainQueryService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/service/MixIpQueryService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/socket/WebSocketEndpoint.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/socket/WsMessageType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/socket/WsUtil.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/test/Ok13Test.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/test/OkPangTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/test/ReadLastLineOfAllFiles.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/test/RestTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/mybatis/mapper/IpDomainMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/mybatis/mapper/IpDomainMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/pojo/AbstractMl.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/pojo/AbstractMl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/pojo/AbstractStar.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/pojo/AbstractStar.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/pojo/SourceIpDomain.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/pojo/SourceIpDomain.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/mybatis/mapper/MixDomainIpMapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/mybatis/mapper/MixIpDomainMapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/pojo/MixDomainIp.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/pojo/MixIpDomain.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/service/MixDomainIpService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/service/MixIpDomainService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/service/impl/MixDomainIpServiceImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/service/impl/MixIpDomainServiceImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/common/QueryType.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/config/SpecifyIpSchedule.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/entity/ip/MixIpRes.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/mybatis/mapper/MlDomainMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/mybatis/mapper/MlDomainMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/mybatis/mapper/MlIcpMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/mybatis/mapper/MlIcpMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/mybatis/mapper/MlIpMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/mybatis/mapper/MlIpMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/mybatis/mapper/MlSubdomainMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/mybatis/mapper/MlSubdomainMapper.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/service/IpDomainService.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/service/IpDomainService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/service/impl/IpDomainImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/service/impl/IpDomainImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/antrun/build-main.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/classes/com/ring/cloud/core/mybatis/mapper/IpDomainMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-core/target/classes/com/ring/cloud/core/mybatis/mapper/IpDomainMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/classes/com/ring/cloud/core/pojo/AbstractMl.class" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-core/target/classes/com/ring/cloud/core/pojo/AbstractMl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/classes/com/ring/cloud/core/pojo/AbstractStar.class" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-core/target/classes/com/ring/cloud/core/pojo/AbstractStar.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/classes/com/ring/cloud/core/pojo/SourceIpDomain.class" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-core/target/classes/com/ring/cloud/core/pojo/SourceIpDomain.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/classes/com/ring/cloud/core/service/IpDomainService.class" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-core/target/classes/com/ring/cloud/core/service/IpDomainService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/classes/com/ring/cloud/core/service/impl/IpDomainImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-core/target/classes/com/ring/cloud/core/service/impl/IpDomainImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/animal-sniffer-annotations-1.14.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/antlr-2.7.7.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/byte-buddy-1.12.23.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/classmate-1.5.1.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/commons-beanutils-1.9.4.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/commons-codec-1.15.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/commons-collections-3.2.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/commons-io-2.8.0.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/commons-lang3-3.12.0.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/error_prone_annotations-2.0.18.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/fastjson-1.2.83.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/guava-22.0.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/hibernate-commons-annotations-5.1.2.Final.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/hibernate-core-5.6.15.Final.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/hibernate-validator-6.2.5.Final.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/httpclient-4.5.14.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/httpcore-4.4.16.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/hutool-all-5.8.21.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/istack-commons-runtime-3.0.12.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/j2objc-annotations-1.1.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/jackson-annotations-2.13.5.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/jackson-core-2.13.5.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/jackson-databind-2.13.5.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/jackson-dataformat-xml-2.13.5.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/jackson-dataformat-yaml-2.13.5.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/jackson-datatype-jsr310-2.13.5.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/jakarta.activation-1.2.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/jakarta.activation-api-1.2.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/jakarta.annotation-api-1.3.5.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/jakarta.persistence-api-2.2.3.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/jakarta.transaction-api-1.3.3.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/jakarta.validation-api-2.0.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/jakarta.xml.bind-api-2.3.3.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/jandex-2.4.2.Final.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/javax.interceptor-api-1.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/jaxb-api-2.3.1.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/jaxb-runtime-2.3.8.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/jboss-logging-3.4.3.Final.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/jboss-transaction-api_1.2_spec-1.1.1.Final.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/jsch-0.1.55.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/jsqlparser-4.5.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/jsr305-1.3.9.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/lombok-1.18.24.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/mapper-base-4.2.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/mapper-core-4.2.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/mapper-extra-4.2.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/ml-core-0.0.1-SNAPSHOT.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/mybatis-3.5.11.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/pagehelper-5.3.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/passay-1.6.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/slf4j-api-1.7.36.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/snakeyaml-1.30.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/spring-beans-5.3.25.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/spring-context-5.3.25.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/spring-core-5.3.25.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/spring-expression-5.3.25.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/spring-jcl-5.3.25.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/spring-tx-5.3.25.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/spring-web-5.3.25.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/stax2-api-4.2.1.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/swagger-annotations-1.5.22.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/txw2-2.3.8.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/welkin-common-core-0.0.1-SNAPSHOT.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/welkin-common-hibernate-0.0.1-SNAPSHOT.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/welkin-common-persistence-0.0.1-SNAPSHOT.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/welkin-common-queryapi-0.0.1-SNAPSHOT.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/welkin-common-validation-0.0.1-SNAPSHOT.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/welkin-common-web-0.0.1-SNAPSHOT.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/woodstox-core-6.4.0.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/deploy/jar/xk-time-3.2.3.Mini.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/maven-archiver/pom.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/ml-core-0.0.1-SNAPSHOT-sources.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/target/ml-core-0.0.1-SNAPSHOT.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/CrawlFacade.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/CrawlFacade.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/common/TaskFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/common/TaskFactory.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/common/TaskTypeEnum.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/common/TaskTypeEnum.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/config/GlobalTaskManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/config/GlobalTaskManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/config/IpCrawlExecutor.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/config/IpRecordWriter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/config/IpSegmentSplitConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/config/IpTaskInitializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/config/IpTaskInitializer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/config/PangIpServcie.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/config/PangIpServcie.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/config/ProxyApiClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/config/ProxyApiClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/config/ProxyPoolManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/proxy/ProxyPoolManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/controller/IpController.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/controller/IpTaskController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/crawl/WebClientUtil.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/service/impl/MlDomainImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/service/impl/MlDomainImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/service/impl/MlIcpImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/service/impl/MlIcpImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/service/impl/MlIpImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/service/impl/MlIpImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/service/impl/MlSubdomainImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/service/impl/MlSubdomainImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/util/DateUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/util/DateUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/util/IpCoreUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-core/src/main/java/com/ring/cloud/core/util/IpCoreUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/config/MixIpQuerySchedule.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/config/MixIpQuerySchedule.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/controller/MixIpQueryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/controller/MixIpQueryController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/entity/ip/IpReadInfo.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/entity/ip/IpReadInfo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/entity/ip/IpSegment.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/entity/ip/IpSegment.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/entity/ip/IpTaskEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/entity/ip/IpTaskEntity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/entity/proxy/ProxyIp.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/entity/proxy/ProxyIp.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/execute/AbstractHandlerExecutor.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/execute/AbstractHandlerExecutor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/execute/TaskHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/execute/TaskHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/execute/TaskHandlerExecutor.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/execute/TaskHandlerExecutor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/frame/RestProxyBase.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/frame/RestProxyBase.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/frame/WebClientProxyBase.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/process/metrics/TaskOperate.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/process/metrics/TaskOperate.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/process/metrics/impl/IpDomainHandle.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/service/IpService.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/service/IpService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/service/SeaCommon.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/service/SeaCommon.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/test/PangUtilTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/test/PangUtilTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/test/ProxyRequestUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/test/ProxyRequestUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/util/FileUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/util/FileUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/util/IpUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/util/IpUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/resources/common.properties" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/resources/common.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/entity/ip/MixIpInfo.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/entity/ip/MixIpInfo.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/execute/IpDomain/IpBaseExecutor.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/execute/IpDomain/IpBaseExecutor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/execute/IpDomain/impl/IpNormalCrawlExecutor.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/execute/IpDomain/impl/IpNormalCrawlExecutor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/execute/IpDomain/impl/MixIpExecutor.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/execute/IpDomain/impl/MixIpExecutor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/frame/OkProxyBase.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/frame/OkProxyBase.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/proxy/GlobalProxyHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/proxy/GlobalProxyHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/proxy/ProxyPoolManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/proxy/ProxyPoolManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/service/MixIpQueryService.java" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/java/com/ring/cloud/facade/service/MixIpQueryService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/resources/crawl.properties" beforeDir="false" afterPath="$PROJECT_DIR$/cloud-ml/ml-facade/src/main/resources/crawl.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/logs/cloud-ml.log" beforeDir="false" afterPath="$PROJECT_DIR$/logs/cloud-ml.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/logs/welkin-ml/welkin-ml.log" beforeDir="false" afterPath="$PROJECT_DIR$/logs/welkin-ml/welkin-ml.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/antrun/build-main.xml" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -284,8 +140,8 @@
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="com.ring.cloud.facade.controller" />
-      <recent name="com.ring.cloud.facade.execute.IpDomain.impl" />
       <recent name="com.ring.cloud.facade.entity.ip" />
+      <recent name="com.ring.cloud.facade.execute.IpDomain.impl" />
       <recent name="com.ring.cloud.facade.service" />
       <recent name="com.ring.cloud.facade.config" />
     </key>
@@ -372,8 +228,8 @@
       <item itemvalue="Application.RestTest" />
       <item itemvalue="Application.Ok13Test" />
       <item itemvalue="Application.OkPangTest" />
-      <item itemvalue="Spring Boot.CrawlFacade" />
       <item itemvalue="Application.ReadLastLineOfAllFiles" />
+      <item itemvalue="Spring Boot.CrawlFacade" />
     </list>
     <recent_temporary>
       <list>
@@ -437,7 +293,8 @@
       <workItem from="1774716507844" duration="137000" />
       <workItem from="1774795391958" duration="5872000" />
       <workItem from="1774832478341" duration="47088000" />
-      <workItem from="1774917695283" duration="95087000" />
+      <workItem from="1774917695283" duration="96721000" />
+      <workItem from="1775368999229" duration="27605000" />
     </task>
     <servers />
   </component>

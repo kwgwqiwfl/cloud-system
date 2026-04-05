@@ -13,10 +13,6 @@ public interface IpDomainService extends BaseIdableService<Long, SourceIpDomain>
 
     PageResult<SourceIpDomain> pageByIpNoCount(IpDomainPageQuery ipDomainPageQuery);
 
-    List<SourceIpDomain> byIp(String ip);
-
-    void deleteByIp(String rankType);
-
     int patchInsert(String tableName, String filePath) throws Exception;
 
 }

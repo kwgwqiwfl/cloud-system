@@ -70,20 +70,15 @@ public class IpDomainImpl extends EntityClassServiceImpl<SourceIpDomain> impleme
         return PageResult.of(0L, pageNum, pageSize, list);
     }
 
-    @Override
-    public List<SourceIpDomain> byIp(String ip) {
-        // 你已经写好的 → 获取分表名
-        String tableName = getTargetTableName(ip);
-
-        // 直接调用注解SQL，最高效率
-        return mapper.selectByIpDynamic(tableName, ip);
-//        return selectList(ExampleQuery.builder(getEntityClass()).andEqualTo("ip", ip));
-    }
-
-    @Override
-    public void deleteByIp(String ip) {
-
-    }
+//    @Override
+//    public List<SourceIpDomain> byIp(String ip) {
+//        // 你已经写好的 → 获取分表名
+//        String tableName = getTargetTableName(ip);
+//
+//        // 直接调用注解SQL，最高效率
+//        return mapper.selectByIpDynamic(tableName, ip);
+////        return selectList(ExampleQuery.builder(getEntityClass()).andEqualTo("ip", ip));
+//    }
 
     /**
      * 根据IP获取目标分表表名

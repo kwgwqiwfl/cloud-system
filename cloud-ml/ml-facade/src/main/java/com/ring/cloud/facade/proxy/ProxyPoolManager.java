@@ -38,7 +38,7 @@ public class ProxyPoolManager {
                 // 2. 拉不到 → 等1秒再循环
                 if (proxyList == null || proxyList.isEmpty()) {
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(200);
                     } catch (InterruptedException ignored) {
                     }
                     continue;

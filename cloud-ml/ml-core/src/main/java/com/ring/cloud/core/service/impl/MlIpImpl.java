@@ -51,21 +51,22 @@ public class MlIpImpl extends EntityClassServiceImpl<MlIp> implements MlIpServic
 
     @Override
     public void batchSaveOrUpdate(List<MlIp> list) {
-        Date today = DateUtil.today();
-        for (MlIp ip : list) {
-            MlIp exist = mapper.selectByIp(ip.getIp());
-            if (exist == null) {
-                ip.setCreateTime(today);
-                ip.setUpdateTime(today);
-                ip.setQueryCount(1);
-                mapper.insertSelective(ip);
-            } else {
-                if (DateUtil.isDifferentMonth(exist.getUpdateTime())) {
-                    exist.setQueryCount(exist.getQueryCount() + 1);
-                }
-                exist.setUpdateTime(today);
-                mapper.updateByPrimaryKeySelective(exist);
-            }
-        }
+        mapper.batchSaveOrUpdate(list);
+//        Date today = DateUtil.today();
+//        for (MlIp ip : list) {
+//            MlIp exist = mapper.selectByIp(ip.getIp());
+//            if (exist == null) {
+//                ip.setCreateTime(today);
+//                ip.setUpdateTime(today);
+//                ip.setQueryCount(1);
+//                mapper.insertSelective(ip);
+//            } else {
+//                if (DateUtil.isDifferentMonth(exist.getUpdateTime())) {
+//                    exist.setQueryCount(exist.getQueryCount() + 1);
+//                }
+//                exist.setUpdateTime(today);
+//                mapper.updateByPrimaryKeySelective(exist);
+//            }
+//        }
     }
 }

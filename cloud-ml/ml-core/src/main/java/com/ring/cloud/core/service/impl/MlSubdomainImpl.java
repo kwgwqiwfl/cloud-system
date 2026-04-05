@@ -51,21 +51,22 @@ public class MlSubdomainImpl extends EntityClassServiceImpl<MlSubdomain> impleme
 
     @Override
     public void batchSaveOrUpdate(List<MlSubdomain> list) {
-        Date today = DateUtil.today();
-        for (MlSubdomain sub : list) {
-            MlSubdomain exist = mapper.selectByDomain(sub.getDomain());
-            if (exist == null) {
-                sub.setCreateTime(today);
-                sub.setUpdateTime(today);
-                sub.setQueryCount(1);
-                mapper.insertSelective(sub);
-            } else {
-                if (DateUtil.isDifferentMonth(exist.getUpdateTime())) {
-                    exist.setQueryCount(exist.getQueryCount() + 1);
-                }
-                exist.setUpdateTime(today);
-                mapper.updateByPrimaryKeySelective(exist);
-            }
-        }
+        mapper.batchSaveOrUpdate(list);
+//        Date today = DateUtil.today();
+//        for (MlSubdomain sub : list) {
+//            MlSubdomain exist = mapper.selectByDomain(sub.getDomain());
+//            if (exist == null) {
+//                sub.setCreateTime(today);
+//                sub.setUpdateTime(today);
+//                sub.setQueryCount(1);
+//                mapper.insertSelective(sub);
+//            } else {
+//                if (DateUtil.isDifferentMonth(exist.getUpdateTime())) {
+//                    exist.setQueryCount(exist.getQueryCount() + 1);
+//                }
+//                exist.setUpdateTime(today);
+//                mapper.updateByPrimaryKeySelective(exist);
+//            }
+//        }
     }
 }

@@ -2,10 +2,8 @@ package com.ring.cloud.core.mybatis.mapper;
 
 import com.ring.cloud.core.pojo.MlDomain;
 import com.ring.welkin.common.persistence.mybatis.mapper.MyIdableMapper;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
+
 import java.util.List;
 
 @Mapper
@@ -25,4 +23,16 @@ public interface MlDomainMapper extends MyIdableMapper<MlDomain> {
 
     @Select("select * from ml_domain where domain = #{domain}")
     MlDomain selectByDomain(@Param("domain") String domain);
+
+    // ===================== 修复版：XML特殊字符全部转义 =====================
+    @Insert("<script>"
+            + "INSERT INTO ml_domain (domain, create_time, update_time) VALUES "
+            + "<foreach collection='list' item='item' separator=','>"
+            + "(#{item.domain}, CURDATE(), CURDATE())"
+            + "</foreach>"
+            + "ON DUPLICATE KEY UPDATE "
+            + "update_time = IF(update_time &lt;&gt; CURDATE(), CURDATE(), update_time), "
+            + "query_count = IF(update_time &lt;&gt; CURDATE() AND PERIOD_DIFF(DATE_FORMAT(CURDATE(),'%Y%m'), DATE_FORMAT(update_time,'%Y%m'))&gt;=1, query_count+1, query_count)"
+            + "</script>")
+    void batchSaveOrUpdate(@Param("list") List<MlDomain> list);
 }

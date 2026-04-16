@@ -1,8 +1,8 @@
-package com.ring.cloud.facade.config;
+package com.ring.cloud.facade.support;
 
 import com.ring.cloud.facade.entity.ip.PangRequest;
 import com.ring.cloud.facade.entity.proxy.ProxyIp;
-import com.ring.cloud.facade.frame.OkProxyBase;
+import com.ring.cloud.facade.frame.OkProxyPang;
 import com.ring.cloud.facade.frame.RetryTemplate;
 import com.ring.cloud.facade.util.IpUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -14,11 +14,11 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class PangIpServcie {
+public class PangIpSupport {
     @Autowired
     private RetryTemplate retryTemplate;
     @Autowired
-    protected OkProxyBase okProxyBase;
+    protected OkProxyPang okProxyPang;
 
     @Value("${ml.client.desc.ip.pangzhan:null}")
     protected String ipPangUrl;
@@ -41,13 +41,13 @@ public class PangIpServcie {
     public List<String> crawlPang(PangRequest request) {
         ProxyIp proxy = request.getProxy();
         String url = IpUtil.buildPangUrl(request.getCurrentIp(), ipPangUrl);
-        String xmlContent = okProxyBase.doProxyRequest(proxy.getIp(), proxy.getPort(), url, "");
+        String xmlContent = okProxyPang.doProxyRequest(proxy.getIp(), proxy.getPort(), url, "");
         return IpUtil.parsePangValidIps(xmlContent);
     }
 
     public List<String> pangIpsNoRetry(String currentIp, ProxyIp proxy) {
         String url = IpUtil.buildPangUrl(currentIp, ipPangUrl);
-        String xmlContent = okProxyBase.doProxyRequest(proxy.getIp(), proxy.getPort(), url, "");
+        String xmlContent = okProxyPang.doProxyRequest(proxy.getIp(), proxy.getPort(), url, "");
         return IpUtil.parsePangValidIps(xmlContent);
     }
 

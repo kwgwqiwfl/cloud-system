@@ -26,15 +26,18 @@ public interface MixDomainIpMapper extends MyIdableMapper<MixDomainIp> {
 
     @Insert({
             "<script>",
-            "INSERT INTO mix_domain_ip (ip, domain, domain_crc, loc, adtime, uptime) ",
+            "INSERT INTO ${tableName} (ip_long, ip, domain, domain_crc, adtime, uptime) ",
             "VALUES ",
             "<foreach collection='list' item='item' separator=','>",
-            "(#{item.ip}, #{item.domain}, #{item.domainCrc}, #{item.loc}, #{item.adtime}, #{item.uptime})",
+            "(#{item.ipLong}, #{item.ip}, #{item.domain}, #{item.domainCrc}, #{item.adtime}, #{item.uptime})",
             "</foreach>",
             "ON DUPLICATE KEY UPDATE ",
-            "loc = VALUES(loc), ",
+            "adtime = VALUES(adtime), ",
             "uptime = VALUES(uptime)",
             "</script>"
     })
-    int batchUpsert(@Param("list") List<MixDomainIp> list);
+    int batchUpsert(
+            @Param("tableName") String tableName,
+            @Param("list") List<MixDomainIp> list
+    );
 }

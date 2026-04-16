@@ -11,7 +11,7 @@ public class ReadLastLineOfAllFiles {
 
     public static void main(String[] args) {
         // 改成你的文件目录
-        String dirPath = "E:\\ml_cloud开发\\tmp文件\\0404";
+        String dirPath = "E:\\ml_cloud开发\\tmp文件\\1-50disanci";
 
         try {
             Files.list(Paths.get(dirPath))
@@ -40,7 +40,7 @@ public class ReadLastLineOfAllFiles {
             }
 
             // 2. 取出第二列 IP
-            String originalIp = parts[1].trim();
+            String originalIp = parts[0].trim();
             // 3. 处理 IP
             String newIp = processIpAddress(originalIp);
 

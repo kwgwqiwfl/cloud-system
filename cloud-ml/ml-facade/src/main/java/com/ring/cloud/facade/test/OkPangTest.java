@@ -2,12 +2,8 @@ package com.ring.cloud.facade.test;
 
 import com.alibaba.fastjson.JSON;
 import com.ring.cloud.facade.entity.proxy.ProxyIp;
-import com.ring.cloud.facade.frame.OkProxyBase;
 import com.ring.cloud.facade.util.IpUtil;
 import okhttp3.*;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -15,13 +11,10 @@ import javax.net.ssl.X509TrustManager;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.lang.reflect.Field;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -56,7 +49,8 @@ public class OkPangTest {
         Headers BROWSER_HEADERS = Headers.of(
                 "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",                "Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
                 "Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8",
-                "Accept-Encoding", "gzip, deflate, br",
+//                "Accept-Encoding", "gzip, deflate, br",
+                "Accept-Encoding", "gzip",//继续优化空间共3项，第1项
                 "Connection", "keep-alive",
                 "Upgrade-Insecure-Requests", "1",
                 "Sec-Fetch-Dest", "document",
@@ -67,15 +61,15 @@ public class OkPangTest {
                 "Cache-Control", "max-age=0",
                 "sec-ch-ua", "\"Not(A:Brand\";v=\"99\", \"Google Chrome\";v=\"133\", \"Chromium\";v=\"133\"",
                 "sec-ch-ua-mobile", "?0",
-                "sec-ch-ua-platform", "\"Windows\"",
-                "Accept-CH", "Sec-CH-UA, Sec-CH-UA-Mobile, Sec-CH-UA-Platform"
+                "sec-ch-ua-platform", "\"Windows\""
+//                "Accept-CH", "Sec-CH-UA, Sec-CH-UA-Mobile, Sec-CH-UA-Platform"//继续优化空间共3项，第2项
         );
 
         Request.Builder builder = new Request.Builder()
                 .url(url)
                 .headers(BROWSER_HEADERS);
         if (url.contains("chapangzhan.com")) {
-            builder.addHeader("Referer", url);
+            builder.addHeader("Referer", "https://chapangzhan.com/");//继续优化空间共3项，第3项
         }
         Request request = builder.build();
         try (Response response = CLIENT.newBuilder().proxy(proxy).build().newCall(request).execute()) {

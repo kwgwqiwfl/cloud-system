@@ -23,15 +23,9 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = true)
 @ApiModel
 @Entity
-@Table(name = "mix_ip")
-@Comment("IP域名分表")
-public class MixIpDomain extends AbstractStar {
-
-    @ApiModelProperty(value = "ip整型")
-    @Comment("ip整型")
-    @Column
-    @ColumnType(jdbcType = JdbcType.BIGINT)
-    private Long ipLong;
+@Table(name = "domain_inout")
+@Comment("域名输入输出表")
+public class DomainInout extends AbstractStar {
 
     @ApiModelProperty(value = "ip地址")
     @Comment("ip地址")
@@ -45,17 +39,17 @@ public class MixIpDomain extends AbstractStar {
     @ColumnType(jdbcType = JdbcType.VARCHAR)
     private String loc;
 
-    @ApiModelProperty("绑定过的域名")
-    @Comment("绑定过的域名")
-    @Column(length = 256)
+    @ApiModelProperty("输入域名")
+    @Comment("输入域名")
+    @Column(length = 191)
     @ColumnType(jdbcType = JdbcType.VARCHAR)
-    private String domain;
+    private String inputDomain;
 
-    @ApiModelProperty("域名CRC32哈希")
-    @Comment("域名CRC32哈希")
-    @Column
-    @ColumnType(jdbcType = JdbcType.INTEGER)
-    private Integer domainCrc;
+    @ApiModelProperty("输出域名")
+    @Comment("输出域名")
+    @Column(length = 191)
+    @ColumnType(jdbcType = JdbcType.VARCHAR)
+    private String outputDomain;
 
     @ApiModelProperty(value = "创建时间", required = false, accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     @Comment("创建时间")
@@ -71,23 +65,13 @@ public class MixIpDomain extends AbstractStar {
     @JsonDeserialize(using = DateJsonDeserializer.class)
     private Date uptime;
 
-    public void setIp(String ip) {
+    public DomainInout() {
+    }
+
+    public DomainInout(String ip, String loc, String outputDomain, String adtime, String uptime) {
         this.ip = ip;
-        this.ipLong = IpCoreUtils.ipToLong(ip);
-    }
-
-    public void setDomain(String domain) {
-        this.domain = domain;
-        this.domainCrc = IpCoreUtils.crc32(domain);
-    }
-
-    public MixIpDomain() {
-    }
-
-    public MixIpDomain(String ip, String loc, String domain, String adtime, String uptime) {
-        this.setIp(ip);
         this.loc = loc;
-        this.setDomain(domain);
+        this.outputDomain = outputDomain;
         this.adtime = DateUtil.parseDate(adtime);
         this.uptime = DateUtil.parseDate(uptime);
     }

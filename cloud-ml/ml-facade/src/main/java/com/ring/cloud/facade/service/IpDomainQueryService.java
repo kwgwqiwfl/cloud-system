@@ -15,11 +15,10 @@ public class IpDomainQueryService extends SeaCommon {
     @Autowired
     private IpDomainService ipDomainService;
 
-    //分页
-    public PageResult<SourceIpDomain> pageByIp(IpDomainPageQuery ipDomainPageQuery) {
-        return ipDomainService.pageByIp(ipDomainPageQuery);
+    public void joinDomains(String filePath) {
+        ipDomainService.joinDomains(filePath);
     }
-    //分页
+
     public PageResult<SourceIpDomain> pageByIpNoCount(IpDomainPageQuery ipDomainPageQuery) {
         return ipDomainService.pageByIpNoCount(ipDomainPageQuery);
     }

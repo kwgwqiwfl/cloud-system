@@ -1,13 +1,11 @@
 package com.ring.cloud.facade.execute;
 
 import com.ring.cloud.facade.common.TaskFactory;
-import com.ring.cloud.facade.config.IpGlobalProgressManager;
-import com.ring.cloud.facade.entity.ip.IpTaskEntity;
+import com.ring.cloud.facade.config.GlobalProgressManager;
+import com.ring.cloud.facade.entity.ip.TaskEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
-
-import java.util.concurrent.CountDownLatch;
 
 @Slf4j
 @Component
@@ -23,7 +21,7 @@ public class TaskHandlerExecutor extends AbstractHandlerExecutor {
 //            execute(new JobStateHandler(taskExecution), DateUtil.FLOW_METRIC_INTERVAL, latch);
 //    }
 
-    public void execHandler(TaskFactory factory, IpGlobalProgressManager progressManager, IpTaskEntity ipTaskEntity){
+    public void execHandler(TaskFactory factory, GlobalProgressManager progressManager, TaskEntity ipTaskEntity){
 //        log.debug("start get job state.....");
             execute(new TaskHandler(factory, progressManager, ipTaskEntity));
     }

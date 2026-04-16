@@ -1,4 +1,4 @@
-package com.ring.cloud.facade.config;
+package com.ring.cloud.facade.support;
 
 import com.ring.cloud.facade.crawl.ProxyUtil;
 import com.ring.cloud.facade.entity.proxy.ProxyIp;

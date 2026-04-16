@@ -3,7 +3,6 @@ package com.ring.cloud.core.service.impl;
 import com.google.common.collect.Lists;
 import com.ring.cloud.core.entity.ip.CommonPageQuery;
 import com.ring.cloud.core.entity.ip.IpDomainPageQuery;
-import com.ring.cloud.core.frame.IpRouteInit;
 import com.ring.cloud.core.frame.PageResult;
 import com.ring.cloud.core.mybatis.mapper.MixIpDomainMapper;
 import com.ring.cloud.core.pojo.MixIpDomain;
@@ -73,25 +72,12 @@ public class MixIpDomainServiceImpl extends EntityClassServiceImpl<MixIpDomain> 
 
     @Override
     public PageResult<MixIpDomain> pageByIpNoCount(IpDomainPageQuery query) {
-        String ip = query.getIp();
-        int pageNum = query.getPageNum();
-        int pageSize = query.getPageSize();
-
-        String suffix = IpRouteInit.getTableSuffix(ip);
-        String tableName = "mix_ip_" + suffix;
-
-        int offset = (pageNum - 1) * pageSize;
-        long ipLong = IpCoreUtils.ipToLong(ip);
-        List<MixIpDomain> list = mapper.selectPageByTable(tableName, ipLong, offset, pageSize);
-
-        return PageResult.of(0L, pageNum, pageSize, list);
+        return null;
     }
 
     // 根据IP查询全量列表
     public List<MixIpDomain> selectByIp(String ip) {
-        String suffix = IpRouteInit.getTableSuffix(ip);
-        String tableName = "mix_ip_" + suffix;
-        return mapper.selectByIpDynamic(tableName, ip);
+        return null;
     }
 
     // ===================== 分表批量UPSERT（核心）=====================

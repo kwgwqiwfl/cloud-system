@@ -1,6 +1,6 @@
 package com.ring.cloud.facade.proxy;
 
-import com.ring.cloud.facade.config.ProxyApiClient;
+import com.ring.cloud.facade.support.ProxyApiClient;
 import com.ring.cloud.facade.entity.proxy.ProxyIp;
 import org.springframework.stereotype.Component;
 

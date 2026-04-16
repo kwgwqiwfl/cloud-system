@@ -10,5 +10,4 @@ public class IpReadInfo {
     private String token = "";
     private int pageSize = 0;//记录数
     private boolean success = false;//成功失败
-    private StringBuilder batchSb;
 }

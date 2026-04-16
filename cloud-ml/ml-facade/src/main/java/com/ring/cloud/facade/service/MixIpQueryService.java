@@ -5,20 +5,21 @@ import com.ring.cloud.core.frame.PageResult;
 import com.ring.cloud.core.pojo.*;
 import com.ring.cloud.core.service.*;
 import com.ring.cloud.facade.common.QueryType;
+import com.ring.cloud.facade.config.SpecifyIpSchedule;
 import com.ring.cloud.facade.entity.ip.IpBreakpoint;
 import com.ring.cloud.facade.entity.ip.MixIpInfo;
 import com.ring.cloud.facade.entity.ip.MixIpRes;
-import com.ring.cloud.facade.entity.proxy.ProxyIp;
-import com.ring.cloud.facade.execute.IpDomain.impl.MixIpExecutor;
+import com.ring.cloud.facade.process.metrics.impl.MixIpImpl;
 import com.ring.cloud.facade.proxy.GlobalProxyHelper;
+import com.ring.cloud.facade.util.IpUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -35,9 +36,9 @@ public class MixIpQueryService extends SeaCommon {
     @Resource
     private MlSubdomainService mlSubdomainService;
     @Autowired
-    private MixIpExecutor mixIpExecutor;
-    @Autowired
     protected GlobalProxyHelper globalProxyHelper;
+    @Autowired
+    protected MixIpImpl mixIpImpl;
 
     @Autowired
     private MixIpDomainService mixIpDomainService;
@@ -73,12 +74,30 @@ public class MixIpQueryService extends SeaCommon {
         return mixIpDomainService.pageSpecifyList(query);
     }
 
+    @Autowired(required = false)
+    private SpecifyIpSchedule specifyIpSchedule;
+
+    public void addSpecifyIp(String ip) {
+        if(StringUtils.isEmpty(ip))
+            throw new IllegalArgumentException("ip 不能为空");
+        specifyIpSchedule.addIp(ip);
+    }
+    public void removeSpecifyIp(String ip) {
+        if(StringUtils.isEmpty(ip))
+            throw new IllegalArgumentException("ip 不能为空");
+        specifyIpSchedule.removeIp(ip);
+    }
+    public void invokeSpecifyIp() {
+        specifyIpSchedule.execute();
+    }
+
+
     public String mixIpStatistics() {
         long start = System.currentTimeMillis();
-        MixIpInfo info = queryMix();
+        MixIpInfo info = mixIpImpl.queryMix();
         long first = System.currentTimeMillis();
         if (info == null)
-            throw new IllegalArgumentException("切换3次代理查询mix失败");
+            throw new IllegalArgumentException("切换5次代理查询mix失败");
         queryMixExt(info);
         long second = System.currentTimeMillis();
         saveAllSixTables(info);
@@ -105,64 +124,81 @@ public class MixIpQueryService extends SeaCommon {
     }
 
     /**
-     * 统一查询所有IP/域名/ICP/子域名数据
-     */
-    private MixIpInfo queryMix() {
-        int retryCount = 0;
-        int maxRetry = 5;
-        while (retryCount < maxRetry) {
-            try {
-                return mixIpExecutor.queryMixInfo(globalProxyHelper.getAvailableProxy());
-            } catch (Throwable e) {
-                retryCount++;
-                log.debug("queryMixInfo 失败，重试次数: {}", retryCount);
-
-                if (retryCount >= maxRetry) {
-                    log.debug("queryMixInfo 重试{}次全部失败，停止查询", maxRetry);
-                    break;
-                }
-            }
-        }
-        return null;
-    }
-    /**
      * 查询ext信息
      */
     private void queryMixExt(MixIpInfo info) {
-        ExecutorService executor = Executors.newFixedThreadPool(10);
+        ExecutorService executor = new ThreadPoolExecutor(
+                10, 10, 60L, TimeUnit.SECONDS,
+                new ArrayBlockingQueue<>(200),
+                new ThreadPoolExecutor.CallerRunsPolicy()
+        );
+
         try {
-            // ======================
-            // 所有任务放到一起：IP + Domain 全部并发
-            // ======================
-            List<Callable<Void>> allTasks = new ArrayList<>();
+            // =============================
+            // 🔥 关键点1：任务返回数据，不直接添加到集合
+            // =============================
+            List<Callable<List<MixIpDomain>>> ipTasks = new ArrayList<>();
+            List<Callable<List<MixDomainIp>>> domainTasks = new ArrayList<>();
 
-            // 1. IP 并发任务
+            // IP任务
             for (MlIp mlIp : info.getIpList()) {
-                allTasks.add(() -> {
+                ipTasks.add(() -> {
                     String ip = mlIp.getIp();
+                    if (IpUtil.isInternalIp(ip)) {
+                        log.debug("内网IP跳过查询: {}", ip);
+                        return new ArrayList<>();
+                    }
                     IpBreakpoint bp = new IpBreakpoint();
-                    List<MixIpDomain> result = mixSingleWithRetry(QueryType.IP, ip, bp, 6, 4).getMixIpDomainList();
-                    info.getMixIpDomainList().addAll(result);
-                    return null;
+                    MixIpRes res = mixIpImpl.mixSingleWithRetry(QueryType.IP, ip, bp, 10, 5);
+                    if (res.getMixIpDomainList() != null) {
+                        return res.getMixIpDomainList();
+                    }
+                    return new ArrayList<>();
                 });
             }
 
-            // 2. Domain 并发任务（和IP一起并发）
+            // Domain任务
             for (MlDomain mlDomain : info.getDomainList()) {
-                allTasks.add(() -> {
+                domainTasks.add(() -> {
                     String domain = mlDomain.getDomain();
-                    List<MixDomainIp> result = mixSingleWithRetry(QueryType.DOMAIN, domain, null, 6, 4).getMixDomainIpList();
-                    info.getMixDomainIpList().addAll(result);
-                    return null;
+                    IpBreakpoint bp = new IpBreakpoint();
+                    MixIpRes res = mixIpImpl.mixSingleWithRetry(QueryType.DOMAIN, domain, bp, 10, 5);
+                    if (res.getMixDomainIpList() != null) {
+                        return res.getMixDomainIpList();
+                    }
+                    return new ArrayList<>();
                 });
             }
-            List<Future<Void>> futures = executor.invokeAll(allTasks, 120, TimeUnit.SECONDS);
-            // 等待完成（防止丢结果）
-            for (Future<Void> future : futures) {
+
+            // 执行IP任务 + 手工获取结果
+            List<MixIpDomain> ipResultList = new ArrayList<>();
+            List<Future<List<MixIpDomain>>> ipFutures = executor.invokeAll(ipTasks);
+            for (Future<List<MixIpDomain>> future : ipFutures) {
                 if (!future.isCancelled()) {
-                    future.get();
+                    List<MixIpDomain> data = future.get();
+                    if (data != null && !data.isEmpty()) {
+                        ipResultList.addAll(data);
+                    }
                 }
             }
+
+            // 执行Domain任务 + 手工获取结果
+            List<MixDomainIp> domainResultList = new ArrayList<>();
+            List<Future<List<MixDomainIp>>> domainFutures = executor.invokeAll(domainTasks);
+            for (Future<List<MixDomainIp>> future : domainFutures) {
+                if (!future.isCancelled()) {
+                    List<MixDomainIp> data = future.get();
+                    if (data != null && !data.isEmpty()) {
+                        domainResultList.addAll(data);
+                    }
+                }
+            }
+
+            // =============================
+            // 🔥 关键点2：主线程单线程赋值，绝对安全
+            // =============================
+            info.setMixIpDomainList(ipResultList);
+            info.setMixDomainIpList(domainResultList);
 
         } catch (Exception e) {
             log.error("并发查询IP+Domain失败", e);
@@ -170,106 +206,65 @@ public class MixIpQueryService extends SeaCommon {
             executor.shutdown();
         }
     }
-
-    //查询扩展信息 ip查询 和domain查询
-    /**
-     * 重试查询（总次数 + 代理异常次数 由外部传入）
-     * @param type          查询类型
-     * @param key           IP或域名
-     * @param breakpoint    分页对象
-     * @param maxTotalTry   最大总尝试次数
-     * @param maxProxyRetry 最大代理异常重试次数
-     * @return 结果
-     */
-    private MixIpRes mixSingleWithRetry(QueryType type, String key, IpBreakpoint breakpoint,
-                                        int maxTotalTry, int maxProxyRetry) {
-        int totalTry = 0;
-        int proxyRetry = 0;
-        ProxyIp currentProxy = null;
-
-        while (totalTry < maxTotalTry) {
-            totalTry++;
-            try {
-                if (currentProxy == null) {
-                    currentProxy = globalProxyHelper.getAvailableProxy();
-                }
-
-                MixIpRes mixIpRes;
-                if (type == QueryType.IP) {
-                    mixIpRes = mixIpExecutor.extByIp(key, currentProxy, breakpoint);
-                } else {
-                    mixIpRes = mixIpExecutor.extByDomain(key, currentProxy);
-                }
-
-                // 成功直接返回
-                if (mixIpRes != null && mixIpRes.isSuccess()) {
-                    return mixIpRes;
-                }
-
-                // 业务失败 → 仅换代理，不扣代理次数
-                currentProxy = null;
-
-            } catch (Throwable e) {
-                // 代理异常 → 计数
-                if (globalProxyHelper.needSwitchProxy(e)) {
-                    proxyRetry++;
-                    currentProxy = null;
-                    if (proxyRetry >= maxProxyRetry) {
-                        log.warn("[{}] 代理异常超限[{}次]，放弃: {}", type, proxyRetry, key);
-                        return new MixIpRes();
-                    }
-                }
-            }
-        }
-
-        log.warn("[{}] 总尝试次数超限[{}次]，放弃: {}", type, totalTry, key);
-        return new MixIpRes();
-    }
-
     // 指定ip列表 定时任务 —— 高可靠版，尽量不失败
     public String specifyIpQuery(List<String> ipList) {
-        List<MixIpDomain> mixIpDomainList = Collections.synchronizedList(new ArrayList<>());
         long start = System.currentTimeMillis();
 
-        // 固定10线程并发
-        ExecutorService executor = Executors.newFixedThreadPool(10);
+        ExecutorService executor = new ThreadPoolExecutor(
+                3, 3, 60L, TimeUnit.SECONDS,
+                new ArrayBlockingQueue<>(200),
+                new ThreadPoolExecutor.CallerRunsPolicy()
+        );
 
         try {
-            List<Callable<Void>> allTasks = new ArrayList<>();
+            // =============================
+            // 🔥 关键点1：任务只返回数据，不addAll
+            // =============================
+            List<Callable<List<MixIpDomain>>> allTasks = new ArrayList<>();
             for (String ip : ipList) {
                 allTasks.add(() -> {
-                    try {
-                        IpBreakpoint bp = new IpBreakpoint();
-                        MixIpRes res = mixSingleWithRetry(QueryType.IP, ip, bp, 40, 16);
-                        if (res.getMixIpDomainList() != null && !res.getMixIpDomainList().isEmpty()) {
-                            mixIpDomainList.addAll(res.getMixIpDomainList());
-                        }
-                    } catch (Throwable e) {
-                        log.error("单个IP查询异常，IP:{}", ip, e);
+                    if (IpUtil.isInternalIp(ip)) {
+                        log.debug("内网IP跳过查询: {}", ip);
+                        return new ArrayList<>();
                     }
-                    return null;
+                    IpBreakpoint bp = new IpBreakpoint();
+                    MixIpRes res = mixIpImpl.mixSingleWithRetry(QueryType.IP, ip, bp, 30, 10);
+                    if (res.getMixIpDomainList() != null) {
+                        return res.getMixIpDomainList();
+                    }
+                    return new ArrayList<>();
                 });
             }
 
-            // 全局超时 40 分钟，足够跑完所有重试
-            List<Future<Void>> futures = executor.invokeAll(allTasks, 40, TimeUnit.MINUTES);
+            // =============================
+            // 🔥 关键点2：主线程统一合并，绝对不丢
+            // =============================
+            List<MixIpDomain> finalList = new ArrayList<>();
+            List<Future<List<MixIpDomain>>> futures = executor.invokeAll(allTasks, 40, TimeUnit.MINUTES);
 
-            // 等待所有任务结束
-            for (Future<Void> future : futures) {
+            for (Future<List<MixIpDomain>> future : futures) {
                 try {
                     if (!future.isCancelled()) {
-                        future.get();
+                        List<MixIpDomain> data = future.get();
+                        if (data != null && !data.isEmpty()) {
+                            finalList.addAll(data);
+                        }
                     }
                 } catch (Exception e) {
-                    // 单个任务失败不影响整体
                     log.warn("IP任务执行被中断", e);
                 }
             }
 
+            // 入库
+            long second = System.currentTimeMillis();
+            specifyBatchUpsert(finalList);
+
+            return (second - start) + "-" + (System.currentTimeMillis() - second);
+
         } catch (Exception e) {
             log.error("IP并发查询整体异常", e);
+            return "error-" + (System.currentTimeMillis() - start);
         } finally {
-            // 安全关闭线程池，绝对不泄露
             executor.shutdown();
             try {
                 if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
@@ -279,14 +274,8 @@ public class MixIpQueryService extends SeaCommon {
                 executor.shutdownNow();
             }
         }
-
-        // 入库
-        long second = System.currentTimeMillis();
-        specifyBatchUpsert(mixIpDomainList);
-
-        // 返回耗时：查询耗时-入库耗时
-        return (second - start) + "-" + (System.currentTimeMillis() - second);
     }
+
 
     @Transactional(rollbackFor = Exception.class)
     public void specifyBatchUpsert(List<MixIpDomain> sIpDomainList) {

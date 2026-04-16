@@ -36,26 +36,26 @@ public class IpRouteInit implements Initializer {
 
     @Override
     public void init() {
-        // 1. 查库
-        List<IpRouteConfig> ipRouteConfigList = ipRouteService.ipRouteList();
-        log.info("ip路由初始化完成，共 {} 条配置", ipRouteConfigList.size());
-
-        // 2. 清空旧数据
-        IP_TABLE_MAP.clear();
-        IP_LEVEL_MAP.clear();
-
-        // 3. 放入内存
-        for (IpRouteConfig config : ipRouteConfigList) {
-            String ip = config.getIp();
-            String suffix = config.getTableSuffix();
-            Integer level = config.getDataCount();
-
-            // 只存有效数据
-            if (ip != null && suffix != null) {
-                IP_TABLE_MAP.put(ip, suffix);
-                IP_LEVEL_MAP.put(ip, level);
-            }
-        }
+//        // 1. 查库
+//        List<IpRouteConfig> ipRouteConfigList = ipRouteService.ipRouteList();
+//        log.info("ip路由初始化完成，共 {} 条配置", ipRouteConfigList.size());
+//
+//        // 2. 清空旧数据
+//        IP_TABLE_MAP.clear();
+//        IP_LEVEL_MAP.clear();
+//
+//        // 3. 放入内存
+//        for (IpRouteConfig config : ipRouteConfigList) {
+//            String ip = config.getIp();
+//            String suffix = config.getTableSuffix();
+//            Integer level = config.getDataCount();
+//
+//            // 只存有效数据
+//            if (ip != null && suffix != null) {
+//                IP_TABLE_MAP.put(ip, suffix);
+//                IP_LEVEL_MAP.put(ip, level);
+//            }
+//        }
     }
     /**
      * 统一获取IP路由表后缀（兼容：精准IP优先 + 第一段兜底）

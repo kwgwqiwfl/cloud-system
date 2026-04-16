@@ -4,30 +4,35 @@ import com.ring.cloud.facade.common.TaskTypeEnum;
 import com.ring.welkin.common.utils.Snowflake;
 import lombok.Data;
 
+import java.util.List;
+
 //线程任务对象
 @Data
-public class IpTaskEntity {
+public class TaskEntity {
     private Long taskId = Snowflake.longId();
     private IpSegment ipSegment;
     private int pageSize = 0;//记录数
     private Long startTime;//记录开始时间
 
-    private String taskType = TaskTypeEnum.IP_DOMAIN_NORMAL.name();
+    private String taskType = TaskTypeEnum.IP_SEG.name();
 
-    // 大IP分段专用字段
-    private String handleIp;
+    // 特殊任务专用字段
+    private String handleKey;
     private Integer startPage;
     private Integer endPage;
     private String loc;
 
+    // domain任务专用字段
+    private List<String> handleKeyList;
+
     // 原有构造不动
-    public IpTaskEntity() {}
-    public IpTaskEntity(IpSegment ipSegment) {
+    public TaskEntity() {}
+    public TaskEntity(IpSegment ipSegment) {
         this.ipSegment = ipSegment;
     }
 
-    public IpTaskEntity(String handleIp, String taskType) {
-        this.handleIp = handleIp;
+    public TaskEntity(String handleIp, String taskType) {
+        this.handleKey = handleIp;
         this.taskType = taskType;
     }
 

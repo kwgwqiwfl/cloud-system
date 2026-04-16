@@ -1,6 +1,8 @@
 package com.ring.cloud.facade.config;
 
 import com.ring.cloud.facade.service.MixIpQueryService;
+import com.ring.cloud.facade.socket.WsMessageType;
+import com.ring.cloud.facade.socket.WsUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
@@ -27,8 +30,10 @@ public class SpecifyIpSchedule {
     private final AtomicLong successCount = new AtomicLong(0);
     private final AtomicLong failCount = new AtomicLong(0);
 
+    private final AtomicBoolean running = new AtomicBoolean(false);
+
     // 线程安全Set，天然去重
-    private static final Set<String> IP_SET = ConcurrentHashMap.newKeySet();
+    public static final Set<String> IP_SET = ConcurrentHashMap.newKeySet();
 
     static {
         // 初始化固定IP（已去重）
@@ -53,9 +58,19 @@ public class SpecifyIpSchedule {
         ));
     }
 
-    public static void addIp(String ip) {
+    public void addIp(String ip) {
         IP_SET.add(ip.trim());
         log.info("动态添加IP成功：{}，当前IP总数：{}", ip, IP_SET.size());
+    }
+
+    // ====================== ✅ 新增：删除IP方法 ======================
+    public void removeIp(String ip) {
+        boolean removed = IP_SET.remove(ip.trim());
+        if (removed) {
+            log.info("动态删除IP成功：{}，当前IP总数：{}", ip.trim(), IP_SET.size());
+        } else {
+            log.warn("动态删除IP失败，IP不存在：{}", ip.trim());
+        }
     }
 
     /**
@@ -68,19 +83,29 @@ public class SpecifyIpSchedule {
     // ====================== 定时任务 ======================
     @Scheduled(cron = "${ml.ip.specify.query.cron:0 0 0,8,16 * * ?}")
     public void execute() {
+        // 已经在运行，直接返回，不重复执行
+        if (!running.compareAndSet(false, true)) {
+            log.info("specify ip 任务正在运行中，跳过本次执行");
+            return;
+        }
         long start = System.currentTimeMillis();
         // 获取当前全量IP（包含动态添加的）
         List<String> ipList = getIpList();
         try {
             log.info("specify ip 定时任务开始，待查询IP数量：{}", ipList.size());
+            WsUtil.push(WsMessageType.SPECIFY_TASK, "specify ip 开始，待查询IP数量："+ipList.size());
             // 传入IP列表执行
             String costs = mixIpQueryService.specifyIpQuery(ipList);
             long success = successCount.incrementAndGet();
             log.info("specify ip 定时任务成功 → 耗时：{} ms  成功次数：{}", costs, success);
+            WsUtil.push(WsMessageType.SPECIFY_TASK, "specify ip成功。耗时："+costs+"  次数："+success);
         } catch (Throwable e) {
             long fail = failCount.incrementAndGet();
             log.error("specify ip 定时任务失败 → 耗时：{} ms  失败次数：{} 信息：{}",
                     (System.currentTimeMillis() - start), fail, e.getMessage());
+            WsUtil.push(WsMessageType.SPECIFY_TASK, "specify ip失败!! 信息："+e.getMessage()+"  失败次数："+fail);
+        }finally {
+            running.set(false);
         }
     }
 }

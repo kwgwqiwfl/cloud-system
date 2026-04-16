@@ -64,6 +64,7 @@ public interface MixIpDomainMapper extends MyIdableMapper<MixIpDomain> {
             "</foreach>",
             "ON DUPLICATE KEY UPDATE ",
             "loc = VALUES(loc), ",
+            "adtime = VALUES(adtime), ",
             "uptime = VALUES(uptime)",
             "</script>"
     })

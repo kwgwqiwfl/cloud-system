@@ -1,17 +1,15 @@
 package com.ring.cloud.facade.service;
 
 import com.alibaba.fastjson.JSON;
-import com.ring.cloud.core.frame.IpRouteInit;
 import com.ring.cloud.core.pojo.IpRouteConfig;
 import com.ring.cloud.core.service.IpDomainService;
 import com.ring.cloud.facade.common.TaskTypeEnum;
 import com.ring.cloud.facade.config.GlobalTaskManager;
-import com.ring.cloud.facade.config.IpGlobalProgressManager;
-import com.ring.cloud.facade.entity.ip.IpGlobalProgress;
+import com.ring.cloud.facade.config.GlobalProgressManager;
+import com.ring.cloud.facade.entity.ip.GlobalProgress;
 import com.ring.cloud.facade.entity.ip.IpImport;
 import com.ring.cloud.facade.entity.ip.IpSegment;
-import com.ring.cloud.facade.entity.ip.IpTaskEntity;
-import com.ring.cloud.facade.execute.IpDomain.impl.IpPageCheckHelper;
+import com.ring.cloud.facade.entity.ip.TaskEntity;
 import com.ring.cloud.facade.util.IpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,9 +28,7 @@ public class IpService extends SeaCommon {
     private static final Random RANDOM = new Random();
 
     @Autowired
-    private IpGlobalProgressManager progressManager;
-    @Autowired
-    private IpPageCheckHelper ipPageCheckHelper;
+    private GlobalProgressManager progressManager;
     @Autowired
     private IpDomainService ipDomainService;
 
@@ -53,7 +49,7 @@ public class IpService extends SeaCommon {
                 throw new IllegalArgumentException("IP【" + lockKey + "】加锁失败");
             }
             log.info("启动单个ip简单任务->"+ ip);
-            handlerExecutor.execHandler(factory, progressManager, new IpTaskEntity(lockKey, TaskTypeEnum.IP_DOMAIN_SMALL.name()));
+            handlerExecutor.execHandler(factory, progressManager, new TaskEntity(lockKey, TaskTypeEnum.IP_SINGLE.name()));
         }
     }
 
@@ -93,7 +89,7 @@ public class IpService extends SeaCommon {
             throw new IllegalArgumentException("启动失败，当前ip段任务加锁失败");
         }
         log.info("启动->"+ JSON.toJSONString(ipSegment));
-        handlerExecutor.execHandler(factory, progressManager, new IpTaskEntity(ipSegment));
+        handlerExecutor.execHandler(factory, progressManager, new TaskEntity(ipSegment));
     }
 
     //正在运行的ip段
@@ -153,76 +149,6 @@ public class IpService extends SeaCommon {
         return map;
     }
 
-    // ====================== 核心配置 ======================
-    private static final int DATA_PER_GRADE = 100000;       // 1档位 = 10万条
-    private static final int PAGE_SIZE = 100;               // 每页条数（你自己的实际值）
-    private static final int MAX_SEGMENTS = 20;             // 最大20线程
-    private static final float SAFETY_EXPAND_RATE = 1.2f;   // 扩容20%，覆盖突增数据
-    private static final int ABSOLUTE_MAX_PAGE = 50000;     // 安全封顶
-
-    // ====================== 最终业务方法 ======================
-    public void startSingleIpAutoSplit1(String targetIp) {
-        String lockKey = targetIp.trim();
-
-        // ====================== 1. 从初始化缓存获取档位 ======================
-        Integer grade = IpRouteInit.IP_LEVEL_MAP.get(lockKey);
-
-        // ====================== 2. 关键规则：查不到 / 0 → 直接返回 ======================
-        if (grade == null || grade <= 0) {
-            log.info("IP【{}】无档位或档位=0，判定为【非大IP】，不执行分段任务", lockKey);
-            throw new IllegalArgumentException("IP【" + lockKey + "】非大IP，无需分段执行");
-        }
-
-        // ====================== 以下只有档位 ≥1 才会执行 ======================
-        // 防重复启动
-        if (GlobalTaskManager.isSegmentRunning(lockKey)) {
-            throw new IllegalArgumentException("IP【" + lockKey + "】正在运行，禁止重复启动");
-        }
-        if (!GlobalTaskManager.occupySegment(lockKey)) {
-            throw new IllegalArgumentException("IP【" + lockKey + "】加锁失败");
-        }
-
-        try {
-            // 计算总页数
-            long totalData = (long) grade * DATA_PER_GRADE;
-            int estimateMaxPage = (int) ((totalData + PAGE_SIZE - 1) / PAGE_SIZE);
-
-            // 安全扩容 + 封顶
-            estimateMaxPage = Math.min((int) (estimateMaxPage * SAFETY_EXPAND_RATE), ABSOLUTE_MAX_PAGE);
-
-            // 20段动态均分
-            int pagesPerSegment = (estimateMaxPage + MAX_SEGMENTS - 1) / MAX_SEGMENTS;
-
-            // 初始化进度
-            progressManager.initTask(lockKey, MAX_SEGMENTS, estimateMaxPage);
-
-            // 提交20个分段任务
-            for (int i = 0; i < MAX_SEGMENTS; i++) {
-                int start = i * pagesPerSegment + 1;
-                int end = Math.min((i + 1) * pagesPerSegment, estimateMaxPage);
-
-                if (start > estimateMaxPage) {
-                    break;
-                }
-
-                IpTaskEntity task = new IpTaskEntity();
-                task.setTaskType(TaskTypeEnum.IP_DOMAIN_LARGE.name());
-                task.setHandleIp(lockKey);
-                task.setStartPage(start);
-                task.setEndPage(end);
-
-                handlerExecutor.execHandler(factory, progressManager, task);
-            }
-
-            log.info("IP【{}】大IP任务启动完成，档位：{}，预估页数：{}，分20段执行", lockKey, grade, estimateMaxPage);
-
-        } catch (Exception e) {
-            GlobalTaskManager.releaseSegment(lockKey);
-            log.error("IP【{}】大IP任务启动失败", lockKey, e);
-            throw e;
-        }
-    }
-
     /**
      * 每段页数：600 页（你确定的最终值）
      */
@@ -231,119 +157,119 @@ public class IpService extends SeaCommon {
      * 对外：启动单个大IP，自动探测 + 自动分段并行
      */
     public void startSingleIpAutoSplit(String targetIp) {
-        String lockKey = targetIp.trim();
-
-        // 防重复启动（线程安全）
-        if (GlobalTaskManager.isSegmentRunning(lockKey)) {
-            throw new IllegalArgumentException("IP【" + lockKey + "】正在运行，禁止重复启动");
-        }
-        if (!GlobalTaskManager.occupySegment(lockKey)) {
-            throw new IllegalArgumentException("IP【" + lockKey + "】加锁失败");
-        }
-
-        try {
-            // 随机探测最大页
-            Map<String, Object> detectResult = detectRandomMaxPage(lockKey);
-            int estimateMaxPage = (int) detectResult.get("maxPage");
-            String loc = (String) detectResult.get("loc");
-            // 计算总段数
-            int totalSegments = (estimateMaxPage + PER_SEGMENT - 1) / PER_SEGMENT;
-            // 预判断队列容量
-            if (!handlerExecutor.canAccept(totalSegments)) {
-                throw new IllegalStateException(
-                        "IP【" + lockKey + "】提交失败：队列剩余空间不足，需" + totalSegments + "个位置");
-            }
-            // 初始化全局进度
-            progressManager.initTask(lockKey, totalSegments, estimateMaxPage);
-
-            // 一次性提交所有分段
-            for (int i = 0; i < totalSegments; i++) {
-                int start = i * PER_SEGMENT + 1;
-                int end = Math.min((i + 1) * PER_SEGMENT, estimateMaxPage);
-
-                IpTaskEntity task = new IpTaskEntity();
-                task.setTaskType(TaskTypeEnum.IP_DOMAIN_LARGE.name());
-                task.setHandleIp(lockKey);
-                task.setStartPage(start);
-                task.setEndPage(end);
-                task.setLoc(loc);
-
-                handlerExecutor.execHandler(factory, progressManager, task);
-            }
-
-        } catch (Exception e) {
-            // 异常释放锁
-            GlobalTaskManager.releaseSegment(lockKey);
-            throw e;
-        }
+//        String lockKey = targetIp.trim();
+//
+//        // 防重复启动（线程安全）
+//        if (GlobalTaskManager.isSegmentRunning(lockKey)) {
+//            throw new IllegalArgumentException("IP【" + lockKey + "】正在运行，禁止重复启动");
+//        }
+//        if (!GlobalTaskManager.occupySegment(lockKey)) {
+//            throw new IllegalArgumentException("IP【" + lockKey + "】加锁失败");
+//        }
+//
+//        try {
+//            // 随机探测最大页
+//            Map<String, Object> detectResult = detectRandomMaxPage(lockKey);
+//            int estimateMaxPage = (int) detectResult.get("maxPage");
+//            String loc = (String) detectResult.get("loc");
+//            // 计算总段数
+//            int totalSegments = (estimateMaxPage + PER_SEGMENT - 1) / PER_SEGMENT;
+//            // 预判断队列容量
+//            if (!handlerExecutor.canAccept(totalSegments)) {
+//                throw new IllegalStateException(
+//                        "IP【" + lockKey + "】提交失败：队列剩余空间不足，需" + totalSegments + "个位置");
+//            }
+//            // 初始化全局进度
+//            progressManager.initTask(lockKey, totalSegments, estimateMaxPage);
+//
+//            // 一次性提交所有分段
+//            for (int i = 0; i < totalSegments; i++) {
+//                int start = i * PER_SEGMENT + 1;
+//                int end = Math.min((i + 1) * PER_SEGMENT, estimateMaxPage);
+//
+//                IpTaskEntity task = new IpTaskEntity();
+//                task.setTaskType(TaskTypeEnum.IP_DOMAIN_LARGE.name());
+//                task.setHandleIp(lockKey);
+//                task.setStartPage(start);
+//                task.setEndPage(end);
+//                task.setLoc(loc);
+//
+//                handlerExecutor.execHandler(factory, progressManager, task);
+//            }
+//
+//        } catch (Exception e) {
+//            // 异常释放锁
+//            GlobalTaskManager.releaseSegment(lockKey);
+//            throw e;
+//        }
     }
 
-    /**
-     * 随机探测逻辑：
-     * 1. 从 400~420 随机一页开始
-     * 2. 倍增后再随机偏移，不使用固定值
-     */
-    private Map<String, Object> detectRandomMaxPage(String ip) {
-        Map<String, Object> result = new HashMap<>();
-        int current = RANDOM.nextInt(21) + 400;
-        int lastValid = current;
-        String finalLoc = null;
-        final int MAX_LIMIT = 200000;
-
-        while (current < MAX_LIMIT) {
-            // -------------- 核心：一次调用拿到 hasData + loc --------------
-            Map<String, Object> check = ipPageCheckHelper.checkHasDataAndLoc(ip, current);
-            boolean hasData = (boolean) check.get("hasData");
-            String loc = (String) check.get("loc");
-
-            if (hasData) {
-                lastValid = current;
-                if (finalLoc == null) {
-                    finalLoc = loc; // 只存第一次拿到的loc
-                }
-
-                long nextVal = (long) current * 2;
-                int offset = Math.max(1, (int) (nextVal * 0.05));
-                current = (int) (nextVal - offset + RANDOM.nextInt(offset * 2 + 1));
-            } else {
-                break;
-            }
-        }
-
-        int maxPage = Math.min(lastValid + PER_SEGMENT, MAX_LIMIT);
-        result.put("maxPage", maxPage);
-        result.put("loc", finalLoc);
-        return result;
-    }
-
-    //ip进度查询
-    public IpGlobalProgress getLargeIpProgress(String targetIp) {
-        return progressManager.getProgress(targetIp);
-    }
-
-    // ip进度查询 带格式化进度（直接返回百分比，前端/日志都能用）
-    public String getLargeIpProgressDesc(String targetIp) {
-        IpGlobalProgress progress = progressManager.getProgress(targetIp);
-        if (progress == null) {
-            return "IP=" + targetIp + " | 任务未初始化";
-        }
-
-        int totalSeg = progress.getTotalSegments().get();
-        int finishSeg = progress.getFinishedSegments().get();
-        long totalPage = progress.getTotalPageEstimate().get();
-        long finishPage = progress.getTotalPageFinished().get();
-
-        double segRate = totalSeg > 0 ? finishSeg * 100.0 / totalSeg : 0;
-        double pageRate = totalPage > 0 ? finishPage * 100.0 / totalPage : 0;
-
-        return String.format("IP=%s | 分段进度=%d/%d(%.1f%%) | 页数进度=%d/%d(%.1f%%)",
-                targetIp,
-                finishSeg, totalSeg, segRate,
-                finishPage, totalPage, pageRate);
-    }
+//    /**
+//     * 随机探测逻辑：
+//     * 1. 从 400~420 随机一页开始
+//     * 2. 倍增后再随机偏移，不使用固定值
+//     */
+//    private Map<String, Object> detectRandomMaxPage(String ip) {
+//        Map<String, Object> result = new HashMap<>();
+//        int current = RANDOM.nextInt(21) + 400;
+//        int lastValid = current;
+//        String finalLoc = null;
+//        final int MAX_LIMIT = 200000;
+//
+//        while (current < MAX_LIMIT) {
+//            // -------------- 核心：一次调用拿到 hasData + loc --------------
+//            Map<String, Object> check = ipPageCheckHelper.checkHasDataAndLoc(ip, current);
+//            boolean hasData = (boolean) check.get("hasData");
+//            String loc = (String) check.get("loc");
+//
+//            if (hasData) {
+//                lastValid = current;
+//                if (finalLoc == null) {
+//                    finalLoc = loc; // 只存第一次拿到的loc
+//                }
+//
+//                long nextVal = (long) current * 2;
+//                int offset = Math.max(1, (int) (nextVal * 0.05));
+//                current = (int) (nextVal - offset + RANDOM.nextInt(offset * 2 + 1));
+//            } else {
+//                break;
+//            }
+//        }
+//
+//        int maxPage = Math.min(lastValid + PER_SEGMENT, MAX_LIMIT);
+//        result.put("maxPage", maxPage);
+//        result.put("loc", finalLoc);
+//        return result;
+//    }
+//
+//    //ip进度查询
+//    public IpGlobalProgress getLargeIpProgress(String targetIp) {
+//        return progressManager.getProgress(targetIp);
+//    }
+//
+//    // ip进度查询 带格式化进度（直接返回百分比，前端/日志都能用）
+//    public String getLargeIpProgressDesc(String targetIp) {
+//        IpGlobalProgress progress = progressManager.getProgress(targetIp);
+//        if (progress == null) {
+//            return "IP=" + targetIp + " | 任务未初始化";
+//        }
+//
+//        int totalSeg = progress.getTotalSegments().get();
+//        int finishSeg = progress.getFinishedSegments().get();
+//        long totalPage = progress.getTotalPageEstimate().get();
+//        long finishPage = progress.getTotalPageFinished().get();
+//
+//        double segRate = totalSeg > 0 ? finishSeg * 100.0 / totalSeg : 0;
+//        double pageRate = totalPage > 0 ? finishPage * 100.0 / totalPage : 0;
+//
+//        return String.format("IP=%s | 分段进度=%d/%d(%.1f%%) | 页数进度=%d/%d(%.1f%%)",
+//                targetIp,
+//                finishSeg, totalSeg, segRate,
+//                finishPage, totalPage, pageRate);
+//    }
     //同步ip路由
     public void syncIpRoute(IpRouteConfig ipRouteConfig) {
-        IpRouteInit.syncIpRoute(ipRouteConfig);
+//        IpRouteInit.syncIpRoute(ipRouteConfig);
     }
     /**
      * 统一停止：支持传入【段号】或【IP】，自动识别并停止
@@ -352,7 +278,7 @@ public class IpService extends SeaCommon {
         boolean hasTask = false;
 
         // 先尝试停止【普通段任务】
-        String normalKey = TaskTypeEnum.IP_DOMAIN_NORMAL.name() + ":" + key;
+        String normalKey = TaskTypeEnum.IP_SEG.name() + ":" + key;
         AtomicBoolean normalFlag = GlobalTaskManager.TASK_STOP_MAP.get(normalKey);
         if (normalFlag != null) {
             normalFlag.set(true);
@@ -385,7 +311,7 @@ public class IpService extends SeaCommon {
         Map<String, Object> result = new HashMap<>();
 
         // 从你真实的进度管理器获取
-        IpGlobalProgress progress = progressManager.getProgress(targetIp);
+        GlobalProgress progress = progressManager.getProgress(targetIp);
 
         if (progress == null) {
             result.put("ip", targetIp);

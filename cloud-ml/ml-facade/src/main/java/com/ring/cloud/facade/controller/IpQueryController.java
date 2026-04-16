@@ -7,10 +7,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
 
@@ -23,17 +20,18 @@ public class IpQueryController {
     @Autowired
     IpDomainQueryService ipQueryService;
 
-    @PostMapping("/pageByIp")
-    @ApiOperation(value = "启动单段操作")
-    public MResponse<?> pageByIp(@RequestBody @NotNull IpDomainPageQuery ipDomainPageQuery) {
+    @GetMapping("/join/domains/{filePath}")
+    @ApiOperation(value = "关联domain临时表查询")
+    public MResponse<?> joinDomains(@PathVariable("filePath") String filePath) {
         try{
-            return MResponse.ok(ipQueryService.pageByIp(ipDomainPageQuery));
+            ipQueryService.joinDomains(filePath);
+            return MResponse.ok("查询完成");
         }catch (Throwable e) {
             return MResponse.error(400, e.getMessage());
         }
     }
     @PostMapping("/pageByIpNoCount")
-    @ApiOperation(value = "启动单段操作")
+    @ApiOperation(value = "fenye")
     public MResponse<?> pageByIpNoCount(@RequestBody @NotNull IpDomainPageQuery ipDomainPageQuery) {
         try{
             return MResponse.ok(ipQueryService.pageByIpNoCount(ipDomainPageQuery));

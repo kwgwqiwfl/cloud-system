@@ -2,6 +2,7 @@ package com.ring.cloud.core.pojo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.ring.cloud.core.util.DateUtil;
 import com.ring.welkin.common.core.jackson.deserializer.DateJsonDeserializer;
 import com.ring.welkin.common.persistence.mybatis.type.routing.DateTypeRoutingHandler;
 import io.swagger.annotations.ApiModel;
@@ -57,4 +58,17 @@ public class SourceIpDomain extends AbstractStar {
     @JsonDeserialize(using = DateJsonDeserializer.class)
     private Date uptime;
 
+    private String adtimeStr;
+    private String uptimeStr;
+
+    public SourceIpDomain() {
+    }
+
+    public SourceIpDomain(String ip, String loc, String domain, String adtimeStr, String uptimeStr) {
+        this.ip = ip;
+        this.loc = loc;
+        this.domain = domain;
+        this.adtimeStr = adtimeStr;
+        this.uptimeStr = uptimeStr;
+    }
 }

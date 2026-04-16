@@ -1,7 +1,6 @@
 package com.ring.cloud.facade.controller;
 
 import com.ring.cloud.core.entity.ip.CommonPageQuery;
-import com.ring.cloud.facade.config.SpecifyIpSchedule;
 import com.ring.cloud.facade.service.MixIpQueryService;
 import com.ring.welkin.common.core.ml.MResponse;
 import io.swagger.annotations.Api;
@@ -94,8 +93,21 @@ public class MixIpQueryController {
     @ApiOperation(value = "动态添加指定IP到定时任务列表", notes = "GET 调用即可")
     @GetMapping("/specify/add/{ip}")
     public MResponse<?> addSpecifyIp(@PathVariable("ip") String ip) {
-        SpecifyIpSchedule.addIp(ip);
+        mixIpQueryService.addSpecifyIp(ip);
         return MResponse.ok("IP添加成功：" + ip);
+    }
+    @ApiOperation(value = "动态删除指定IP", notes = "GET 调用即可")
+    @GetMapping("/specify/remove/{ip}")
+    public MResponse<?> removeSpecifyIp(@PathVariable("ip") String ip) {
+        mixIpQueryService.removeSpecifyIp(ip);
+        return MResponse.ok("IP删除成功：" + ip);
+    }
+
+    @ApiOperation(value = "触发指定IP定时任务", notes = "手动触发")
+    @GetMapping("/specify/invoke")
+    public MResponse<?> invokeSpecifyIp() {
+        mixIpQueryService.invokeSpecifyIp();
+        return MResponse.ok("手动触发成功");
     }
 
 }

@@ -1,13 +1,11 @@
 package com.ring.cloud.core.service.impl;
 
 import com.ring.cloud.core.entity.ip.IpDomainPageQuery;
-import com.ring.cloud.core.frame.IpRouteInit;
 import com.ring.cloud.core.frame.PageResult;
 import com.ring.cloud.core.mybatis.mapper.IpDomainMapper;
 import com.ring.cloud.core.pojo.SourceIpDomain;
 import com.ring.cloud.core.service.IpDomainService;
 import com.ring.cloud.core.util.DateUtil;
-import com.ring.cloud.core.util.IpCoreUtils;
 import com.ring.welkin.common.persistence.mybatis.mapper.MyIdableMapper;
 import com.ring.welkin.common.persistence.service.entity.EntityClassServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,75 +30,29 @@ public class IpDomainImpl extends EntityClassServiceImpl<SourceIpDomain> impleme
     }
 
     @Override
-    public PageResult<SourceIpDomain> pageByIp(IpDomainPageQuery query) {
-        String ip = query.getIp();
-        int pageNum = query.getPageNum();
-        int pageSize = query.getPageSize();
-
-        // ====================== 路由核心 ======================
-        String suffix = IpRouteInit.getTableSuffix(ip);
-        String tableName = "ip_domain_" + suffix;
-
-        // 计算 offset
-        int offset = (pageNum - 1) * pageSize;
-        long ipLong = IpCoreUtils.ipToLong(ip);
-        // 查询数据
-        List<SourceIpDomain> list = mapper.selectPageByTable(tableName, ipLong, offset, pageSize);
-        long total = mapper.countIpByTable(tableName, ipLong);
-
-        return PageResult.of(total, pageNum, pageSize, list);
+    public void joinDomains(String filePath) {
+        mapper.exportToFileByDomainTempTable(filePath);
     }
 
     @Override
     public PageResult<SourceIpDomain> pageByIpNoCount(IpDomainPageQuery query) {
-        String ip = query.getIp();
-        int pageNum = query.getPageNum();
-        int pageSize = query.getPageSize();
-
-        // ====================== 路由核心 ======================
-        String suffix = IpRouteInit.getTableSuffix(ip);
-        String tableName = "ip_domain_" + suffix;
-
-        // 计算 offset
-        int offset = (pageNum - 1) * pageSize;
-        long ipLong = IpCoreUtils.ipToLong(ip);
-        // 查询数据
-        List<SourceIpDomain> list = mapper.selectPageByTable(tableName, ipLong, offset, pageSize);
-
-        return PageResult.of(0L, pageNum, pageSize, list);
-    }
-
-//    @Override
-//    public List<SourceIpDomain> byIp(String ip) {
-//        // 你已经写好的 → 获取分表名
-//        String tableName = getTargetTableName(ip);
+//        String ip = query.getIp();
+//        int pageNum = query.getPageNum();
+//        int pageSize = query.getPageSize();
 //
-//        // 直接调用注解SQL，最高效率
-//        return mapper.selectByIpDynamic(tableName, ip);
-////        return selectList(ExampleQuery.builder(getEntityClass()).andEqualTo("ip", ip));
-//    }
-
-    /**
-     * 根据IP获取目标分表表名
-     * 规则：
-     * 1. 先查路由表（你后面加）
-     * 2. 没查到 → 小IP自动分配 17/18/19/20
-     */
-    private String getTargetTableName(String ip) {
-
-        // ================= 小IP自动规则 =================
-        // 取IP第一段
-        String[] arr = ip.split("\\.");
-        String first = arr[0];
-        int num = Integer.parseInt(first);
-
-        // 自动分配到 17 18 19 20
-        int suffix = (num % 4) + 17;
-
-        // 返回表名：ip_domain_17、ip_domain_18...
-        return "ip_domain_" + suffix;
+//        // ====================== 路由核心 ======================
+//        String suffix = IpRouteInit.getTableSuffix(ip);
+//        String tableName = "ip_domain_" + suffix;
+//
+//        // 计算 offset
+//        int offset = (pageNum - 1) * pageSize;
+//        long ipLong = IpCoreUtils.ipToLong(ip);
+//        // 查询数据
+//        List<SourceIpDomain> list = mapper.selectPageByTable(tableName, ipLong, offset, pageSize);
+//
+//        return PageResult.of(0L, pageNum, pageSize, list);
+        return PageResult.of(0L, 1, 1, new ArrayList<>());
     }
-
 
     @Override
     public int patchInsert(String tableName, String filePath) throws Exception {

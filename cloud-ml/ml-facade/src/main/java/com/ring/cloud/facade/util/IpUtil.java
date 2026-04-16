@@ -1,5 +1,6 @@
 package com.ring.cloud.facade.util;
 
+import com.ring.cloud.facade.config.SpecifyIpSchedule;
 import com.ring.cloud.facade.entity.ip.IpSegment;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -9,10 +10,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.net.InetAddress;
+import java.util.*;
 
 /**
  * ip工具类
@@ -33,18 +32,33 @@ public class IpUtil {
         return 10 + RANDOM.nextInt(21);
     }
     //生成ip domain url 第一页查询 url="https://site.ip138.com/1.1.1.1";
-    public static String buildIpUrlFirst(String ip, String ipDomainUrl) {
-        return ipDomainUrl + "/" + ip;
+    public static String buildIpUrlFirst(String ip, String ipBaseUrl) {
+        return ipBaseUrl + "/" + ip;
     }
 
     //生成ip domain url 分页查询 url="https://site.ip138.com/index/querybyip/?ip=1.1.1.1&page=2&token=2ea08c94ef895a05b7df3182717f8dc2";
-    public static String buildIpUrlPage(int page, String ip, String ipDomainUrl, String ipPageInfix, String dynamicToken) {
-        return ipDomainUrl + "/" + ipPageInfix + "/?ip=" + ip + "&page=" + page + "&token=" + dynamicToken;
+    public static String buildIpUrlPage(int page, String ip, String ipBaseUrl, String ipPageInfix, String dynamicToken) {
+        return ipBaseUrl + "/" + ipPageInfix + "/?ip=" + ip + "&page=" + page + "&token=" + dynamicToken;
+    }
+
+    //生成domain ip url 分页查询 url="https://site.ip138.com/index/querybydomain/?domain=google.cn&page=6&token=1bc656986f10a4666cd98bd166f9afdb";
+    public static String buildDomainUrlPage(int page, String domain, String ipBaseUrl, String domainPageInfix, String dynamicToken) {
+        return ipBaseUrl + "/" + domainPageInfix + "/?domain=" + domain + "&page=" + page + "&token=" + dynamicToken;
     }
 
     //生成ip pangzhan url="https://chapangzhan.com/3.1.1.0/24";
     public static String buildPangUrl(String ip, String ipPangUrl) {
         return ipPangUrl + "/" + ip + "/24";
+    }
+
+    //生成subdomain首页 url="https://chaziyu.com/123.com/";
+    public static String buildSubdomainUrlFirst(String domain, String subdomainUrl) {
+        return subdomainUrl + "/" + domain;
+    }
+
+    //生成subdomain分页 url="https://chaziyu.com/ipchaxun.do?domain=amazon.com&page=4";
+    public static String buildSubdomainUrlPage(String domain, String subdomainUrl, int page) {
+        return subdomainUrl + "/ipchaxun.do?domain=" + domain + "&page=" +page;
     }
 
     /**
@@ -68,19 +82,47 @@ public class IpUtil {
 
     public static List<String> parsePangValidIps(String xmlContent) {
         if(!validStrContains(xmlContent, "c-bd", "tfoot"))//校验html字符串
-            throw new IllegalArgumentException("pang xml异常");
+            throw new IllegalArgumentException("pang html为空");
         List<String> ips = new ArrayList<>();
-            Document doc = Jsoup.parse(xmlContent);
-            Element table = doc.selectFirst("div.c-bd table");
-            assert table != null;
-            Elements trList = table.select("tbody tr.J_link");
-            for (Element tr : trList) {
-                Elements tdList = tr.select("td");
-                if(CollectionUtils.isEmpty(tdList))
-                    throw new IllegalArgumentException("pang 列表异常");
-                ips.add(tdList.get(0).text());
+        Document doc = Jsoup.parse(xmlContent);
+        Element table = doc.selectFirst("div.c-bd table");
+        assert table != null;
+        Elements trList = table.select("tbody tr.J_link");
+        for (Element tr : trList) {
+            Elements tdList = tr.select("td");
+            if(CollectionUtils.isEmpty(tdList))
+                throw new IllegalArgumentException("pang 列表异常");
+            ips.add(tdList.get(0).text());
+        }
+        return ips;
+    }
+
+    /**
+     * 解析 chaziyu.com 子域名页面
+     * 逻辑：
+     * 1. 判断是否正常页面（包含站点标识）
+     * 2. 判断是否有数据（不存在 .none 或 “暂无相关数据”）禁止查询该域名
+     * 3. 提取所有子域名并去重
+     */
+    public static Set<String> parseSubDomains(String html) {
+        Set<String> domainSet = new HashSet<>();
+        if (!html.contains("子域名查询")) {
+            throw new IllegalArgumentException("subdomain html异常");
+        }
+        if (html.contains("暂无相关数据") || html.contains("禁止查询该域名") ) {
+            return domainSet;
+        }
+        Document doc = Jsoup.parse(html);
+        Elements linkElements = doc.select(".J_subdomain tbody tr td a");
+        if (linkElements != null && !linkElements.isEmpty()) {
+            for (Element a : linkElements) {
+                String domain = a.text().trim();
+                if (!domain.isEmpty() && domain.contains(".")) {
+                    domainSet.add(domain);
+                }
             }
-            return ips;
+        }
+        return domainSet;
     }
 
     // 获取本段起始IP
@@ -255,7 +297,7 @@ public class IpUtil {
         List<IpSegment> list = new ArrayList<>();
 
         // 生成 5 个：startNo ~ startNo+4
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 3; i++) {
             int currentSeg = startNo + i;
 
             String startIp = currentSeg + ".0.0.0";
@@ -297,6 +339,61 @@ public class IpUtil {
             throw new IllegalArgumentException("IP 不能为空");
         }
         return ip.split("\\.")[0]; // 只取第一段，直接返回String
+    }
+
+    // 最高效率 · 最终版
+    public static boolean isInternalIp(String ip) {
+        try {
+            InetAddress addr = InetAddress.getByName(ip);
+            return addr.isLoopbackAddress() || addr.isSiteLocalAddress();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    // 需要过滤的网段（前两段匹配规则）
+    private static final Set<String> FILTER_PREFIX_SET = new HashSet<>(Arrays.asList(
+            "103.21.",
+            "103.22.",
+            "103.31.",
+            "104.16.",
+            "104.24.",
+            "108.162.",
+            "131.0.",
+            "141.101.",
+            "162.158.",
+            "172.64.",
+            "173.245.",
+            "188.114.",
+            "190.93.",
+            "197.234.",
+            "198.41."
+    ));
+
+    /**
+     * 过滤IP集合：排除指定黑名单网段IP
+     * @param ipSet 原始IP集合
+     * @return 过滤后的合法IP集合
+     */
+    public static Set<String> filterIpSet(Set<String> ipSet) {
+        Set<String> result = new HashSet<>();
+        if (ipSet == null || ipSet.isEmpty()) {
+            return result;
+        }
+
+        for (String ip : ipSet) {
+            if (ip == null) {
+                continue;
+            }
+            if(SpecifyIpSchedule.IP_SET.contains(ip))
+                continue;
+            // 过滤黑名单前缀
+            boolean isFilter = FILTER_PREFIX_SET.stream().anyMatch(ip::startsWith);
+            if (!isFilter) {
+                result.add(ip);
+            }
+        }
+        return result;
     }
 
     public static void main(String[] args) {

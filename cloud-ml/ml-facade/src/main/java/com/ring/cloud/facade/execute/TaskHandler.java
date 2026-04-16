@@ -3,92 +3,128 @@ package com.ring.cloud.facade.execute;
 import com.ring.cloud.facade.common.TaskFactory;
 import com.ring.cloud.facade.common.TaskTypeEnum;
 import com.ring.cloud.facade.config.GlobalTaskManager;
-import com.ring.cloud.facade.config.IpGlobalProgressManager;
-import com.ring.cloud.facade.entity.ip.IpGlobalProgress;
-import com.ring.cloud.facade.entity.ip.IpTaskEntity;
+import com.ring.cloud.facade.config.GlobalProgressManager;
+import com.ring.cloud.facade.entity.ip.GlobalProgress;
+import com.ring.cloud.facade.entity.ip.TaskEntity;
+import com.ring.cloud.facade.entity.ip.TaskIdentity;
+import com.ring.cloud.facade.socket.WsMessageType;
+import com.ring.cloud.facade.socket.WsUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 public class TaskHandler implements IHandler {
-    private final TaskFactory factory;
-    private final IpGlobalProgressManager progressManager;
-    private final IpTaskEntity ipTaskEntity;
 
-    public TaskHandler(TaskFactory factory, IpGlobalProgressManager progressManager, IpTaskEntity ipTaskEntity) {
+    private final TaskFactory factory;
+    private final GlobalProgressManager progressManager;
+    private final TaskEntity taskEntity;
+
+    public TaskHandler(TaskFactory factory, GlobalProgressManager progressManager, TaskEntity ipTaskEntity) {
         this.factory = factory;
         this.progressManager = progressManager;
-        this.ipTaskEntity = ipTaskEntity;
+        this.taskEntity = ipTaskEntity;
         ipTaskEntity.setStartTime(System.currentTimeMillis());
     }
 
-    /**
-     * @return 是否执行结束循环; true-执行结束；false-未结束
-     */
     @Override
     public boolean handle() {
-        String taskType = ipTaskEntity.getTaskType();
+        TaskIdentity identity = buildTaskIdentity(taskEntity.getTaskType());
+        boolean status = executeTask(identity);
+        finishTask(identity, status);
+        return status;
+    }
+
+    // ====================== 构建任务标识（只写1次）======================
+    private TaskIdentity buildTaskIdentity(String taskType) {
+        boolean isLargeIp = TaskTypeEnum.IP_DOMAIN_LARGE.name().equals(taskType);
+        boolean isSmallIp = TaskTypeEnum.IP_SINGLE.name().equals(taskType);
+        boolean isDomainBatch = TaskTypeEnum.DOMAIN.name().equals(taskType);
+
         String uniqueKey;
         String lockKey = null;
-        boolean isLargeIpTask = TaskTypeEnum.IP_DOMAIN_LARGE.name().equals(taskType);
-        // ====================== IP单任务标记 ======================
-        boolean isSmallIpTask = TaskTypeEnum.IP_DOMAIN_SMALL.name().equals(taskType);
-        // 生成唯一KEY + 锁KEY
-        if (isLargeIpTask) {
-            String handleIp = ipTaskEntity.getHandleIp();
+
+        if (isLargeIp) {
+            String handleIp = taskEntity.getHandleKey();
             uniqueKey = taskType + ":" + handleIp;
             lockKey = handleIp;
-        }else if (isSmallIpTask) {
-            String handleIp = ipTaskEntity.getHandleIp();
+        }
+        else if (isSmallIp) {
+            String handleIp = taskEntity.getHandleKey();
             uniqueKey = taskType + ":" + handleIp;
             lockKey = handleIp;
-        } else {
-            String segNo = ipTaskEntity.getIpSegment().getSegmentNo();
+        }
+        else if (isDomainBatch) {
+            lockKey = "domain_import_task";
+            uniqueKey = taskType + ":thread_" + Thread.currentThread().getId();
+        }
+        else {
+            String segNo = taskEntity.getIpSegment().getSegmentNo();
             uniqueKey = taskType + ":" + segNo;
             lockKey = segNo;
         }
 
-        log.info("任务开始，唯一标识={}", uniqueKey);
-        boolean status = false;
+        TaskIdentity identity = new TaskIdentity();
+        identity.setTaskType(taskType);
+        identity.setUniqueKey(uniqueKey);
+        identity.setLockKey(lockKey);
+        identity.setLargeIpTask(isLargeIp);
+        identity.setSmallIpTask(isSmallIp);
+        identity.setDomainBatchTask(isDomainBatch);
+
+        return identity;
+    }
+
+    // ====================== 执行任务 ======================
+    private boolean executeTask(TaskIdentity identity) {
+        log.info("任务开始，唯一标识={}", identity.getUniqueKey());
+        try {
+            GlobalTaskManager.TASK_STOP_MAP.put(identity.getUniqueKey(), new AtomicBoolean(false));
+            return factory.getTask(identity.getTaskType()).runTask(taskEntity);
+        } catch (Throwable e) {
+            log.error("任务执行异常 唯一标识={}", identity.getUniqueKey(), e);
+            WsUtil.push(WsMessageType.TASK, identity.getUniqueKey() + "任务失败：" + e.getMessage());
+            return false;
+        }
+    }
+
+    // ====================== 统一完成逻辑（只写1遍，全复用）======================
+    private void finishTask(TaskIdentity identity, boolean status) {
+        String uniqueKey = identity.getUniqueKey();
+        String lockKey = identity.getLockKey();
 
         try {
-            GlobalTaskManager.TASK_STOP_MAP.put(uniqueKey, new AtomicBoolean(false));
-            // 执行任务
-            status = factory.taskManage(taskType).runTask(ipTaskEntity);
+            // 日志推送
+            long cost = System.currentTimeMillis() - taskEntity.getStartTime();
+            log.info("任务结束 唯一标识={} 状态：{} 耗时：{}ms", uniqueKey, status, cost);
+            WsUtil.push(WsMessageType.TASK, uniqueKey + "任务完成。耗时：" + cost + "ms");
 
-            log.info("任务结束 唯一标识={} 状态：{} 耗时：{} ms",
-                    uniqueKey, status, (System.currentTimeMillis() - ipTaskEntity.getStartTime()));
+            // ====================== 统一逻辑：所有批量任务只走这里 ======================
+            if (identity.isNeedFinishAllRelease()) {
+                // 自动计算完成数量
+                int finishedCount = identity.isLargeIpTask()
+                        ? taskEntity.getEndPage() - taskEntity.getStartPage() + 1
+                        : taskEntity.getHandleKeyList().size();
 
-        } catch (Throwable e) {
-            log.error("任务执行异常 唯一标识={}", uniqueKey, e);
+                progressManager.onSegmentFinish(lockKey, finishedCount);
 
-        } finally {
-            // ====================== 统一处理：成功/异常 都走这里（合并重复逻辑） ======================
-            if (isLargeIpTask) {
-                int finishedPages = ipTaskEntity.getEndPage() - ipTaskEntity.getStartPage() + 1;
-                progressManager.onSegmentFinish(lockKey, finishedPages);
-
-                IpGlobalProgress progress = progressManager.getProgress(lockKey);
+                // 全部完成 → 统一释放锁
+                GlobalProgress progress = progressManager.getProgress(lockKey);
                 if (progress != null && progress.getFinishedSegments().get() == progress.getTotalSegments().get()) {
-                    // 统一打印整体完成
                     log.info("==========================================================");
-                    log.info("✅ IP【{}】任务【全部完成】总分段:{} | 已完成:{}",
-                            lockKey, progress.getTotalSegments().get(), progress.getFinishedSegments().get());
+                    log.info("✅ 任务全部完成，释放全局锁：{}", lockKey);
                     log.info("==========================================================");
-                    log.info("✅ IP【{}】释放全局锁", lockKey);
                     GlobalTaskManager.releaseSegment(lockKey);
                 }
             }
 
-            // 普通任务：仅在这里释放锁
-            if (lockKey != null && !isLargeIpTask) {
+            // ====================== 立即释放：小IP、SEG ======================
+            else if (lockKey != null) {
                 GlobalTaskManager.releaseSegment(lockKey);
             }
 
+        } finally {
             GlobalTaskManager.TASK_STOP_MAP.remove(uniqueKey);
         }
-
-        return status;
     }
 }

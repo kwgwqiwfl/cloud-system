@@ -1,36 +1,34 @@
 package com.ring.cloud.facade.common;
 
-import com.ring.cloud.facade.process.metrics.ITaskManage;
+import com.ring.cloud.facade.process.metrics.ITask;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
-
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
 
 @Component
 public class TaskFactory implements InitializingBean, ApplicationContextAware {
-    private static final Map<String, Supplier<? extends ITaskManage<?>>> taskMap = new HashMap<>();
+
+    private final Map<String, ITask<?>> taskMap = new HashMap<>();
     private ApplicationContext applicationContext;
 
-    @SuppressWarnings("unchecked")
-    public <T> ITaskManage<T> taskManage(String type) {
-        Supplier<? extends ITaskManage<?>> p = taskMap.get(type);
-        if (p != null) {
-            return (ITaskManage<T>) p.get();
+    public <T> ITask<T> getTask(String type) {
+        ITask<?> task = taskMap.get(type);
+        if (task == null) {
+            throw new IllegalArgumentException("无此任务类型: " + type);
         }
-        throw new IllegalArgumentException("No such ITaskManage by type:" + type);
+        return (ITask<T>) task;
     }
 
     @Override
     public void afterPropertiesSet() {
-        applicationContext.getBeansOfType(ITaskManage.class)
+        applicationContext.getBeansOfType(ITask.class)
                 .values()
-                .forEach(c -> taskMap.put(c.taskEnum().name(), () -> c));
+                .forEach(task -> taskMap.put(task.taskEnum().name(), task));
     }
 
     @Override

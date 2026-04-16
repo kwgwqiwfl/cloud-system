@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface IpDomainService extends BaseIdableService<Long, SourceIpDomain> {
 
-    PageResult<SourceIpDomain> pageByIp(IpDomainPageQuery ipDomainPageQuery);
+    void joinDomains(String filePath);
 
     PageResult<SourceIpDomain> pageByIpNoCount(IpDomainPageQuery ipDomainPageQuery);
 

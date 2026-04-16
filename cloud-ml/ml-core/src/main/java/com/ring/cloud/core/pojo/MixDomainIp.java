@@ -2,6 +2,7 @@ package com.ring.cloud.core.pojo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.ring.cloud.core.util.DateUtil;
 import com.ring.cloud.core.util.IpCoreUtils;
 import com.ring.welkin.common.core.jackson.deserializer.DateJsonDeserializer;
 import com.ring.welkin.common.persistence.mybatis.type.routing.DateTypeRoutingHandler;
@@ -32,6 +33,12 @@ public class MixDomainIp extends AbstractStar {
     @ColumnType(jdbcType = JdbcType.VARCHAR)
     private String ip;
 
+    @ApiModelProperty(value = "ip整型")
+    @Comment("ip整型")
+    @Column
+    @ColumnType(jdbcType = JdbcType.BIGINT)
+    private Long ipLong;
+
     @ApiModelProperty(value = "域名")
     @Comment("域名")
     @Column(length = 256, nullable = false)
@@ -43,12 +50,6 @@ public class MixDomainIp extends AbstractStar {
     @Column(nullable = false)
     @ColumnType(jdbcType = JdbcType.INTEGER)
     private Integer domainCrc;
-
-    @ApiModelProperty(value = "归属地")
-    @Comment("归属地")
-    @Column(length = 128)
-    @ColumnType(jdbcType = JdbcType.VARCHAR)
-    private String loc;
 
     @ApiModelProperty(value = "创建时间")
     @Comment("创建时间")
@@ -67,5 +68,20 @@ public class MixDomainIp extends AbstractStar {
     public void setDomain(String domain) {
         this.domain = domain;
         this.domainCrc = IpCoreUtils.crc32(domain);
+    }
+
+    public void setIpString(String ip) {
+        this.ip = ip;
+        this.ipLong = IpCoreUtils.ipToLong(ip);
+    }
+
+    public MixDomainIp() {
+    }
+
+    public MixDomainIp(String ip, String domain, String adtime, String uptime) {
+        this.setIpString(ip);
+        this.setDomain(domain);
+        this.adtime = DateUtil.parseDate(adtime);
+        this.uptime = DateUtil.parseDate(uptime);
     }
 }

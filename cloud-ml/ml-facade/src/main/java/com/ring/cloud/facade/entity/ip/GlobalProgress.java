@@ -6,11 +6,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Data
-public class IpGlobalProgress {
-    /**
-     * 目标大IP
-     */
-    private String ip;
+public class GlobalProgress {
+    private String taskKey;
 
     /**
      * 总分段数（探测后确定）

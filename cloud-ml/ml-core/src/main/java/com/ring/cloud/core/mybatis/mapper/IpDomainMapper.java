@@ -59,4 +59,37 @@ public interface IpDomainMapper extends MyIdableMapper<SourceIpDomain> {
             @Param("tableName") String tableName,
             @Param("list") List<SourceIpDomain> list
     );
+
+    /**
+     * 批量域名关联查询 + 直接导出到文件（无返回值·最快）
+     * 临时表：ip_domains_tmp
+     * 兼容 MySQL 5.6/5.7/8.0+
+     */
+    @Select({
+            "SELECT t.ip,t.loc,t.domain,t.adtime,t.uptime,t.ip_long ",
+            "FROM ( ",
+            "SELECT ip,loc,domain,adtime,uptime,ip_long FROM ip_domain_0 UNION ALL ",
+            "SELECT ip,loc,domain,adtime,uptime,ip_long FROM ip_domain_1 UNION ALL ",
+            "SELECT ip,loc,domain,adtime,uptime,ip_long FROM ip_domain_2 UNION ALL ",
+            "SELECT ip,loc,domain,adtime,uptime,ip_long FROM ip_domain_3 UNION ALL ",
+            "SELECT ip,loc,domain,adtime,uptime,ip_long FROM ip_domain_4 UNION ALL ",
+            "SELECT ip,loc,domain,adtime,uptime,ip_long FROM ip_domain_5 UNION ALL ",
+            "SELECT ip,loc,domain,adtime,uptime,ip_long FROM ip_domain_6 UNION ALL ",
+            "SELECT ip,loc,domain,adtime,uptime,ip_long FROM ip_domain_7 UNION ALL ",
+            "SELECT ip,loc,domain,adtime,uptime,ip_long FROM ip_domain_8 UNION ALL ",
+            "SELECT ip,loc,domain,adtime,uptime,ip_long FROM ip_domain_9 UNION ALL ",
+            "SELECT ip,loc,domain,adtime,uptime,ip_long FROM ip_domain_10 UNION ALL ",
+            "SELECT ip,loc,domain,adtime,uptime,ip_long FROM ip_domain_11 UNION ALL ",
+            "SELECT ip,loc,domain,adtime,uptime,ip_long FROM ip_domain_12 UNION ALL ",
+            "SELECT ip,loc,domain,adtime,uptime,ip_long FROM ip_domain_13 UNION ALL ",
+            "SELECT ip,loc,domain,adtime,uptime,ip_long FROM ip_domain_14 UNION ALL ",
+            "SELECT ip,loc,domain,adtime,uptime,ip_long FROM ip_domain_15 ",
+            ") t ",
+            "INNER JOIN ip_domains_tmp tmp ON t.domain = tmp.domain ",
+            "INTO OUTFILE #{filePath} ",
+            "CHARACTER SET utf8mb4 ",
+            "FIELDS TERMINATED BY ',' ",
+            "LINES TERMINATED BY '\\n'"
+    })
+    void exportToFileByDomainTempTable(@Param("filePath") String filePath);
 }

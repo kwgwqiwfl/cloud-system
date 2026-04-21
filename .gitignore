@@ -1,4 +1,8 @@
 *.log
+*.gitignore
+# 忽略日志文件
+welkin-ml.log.*
+cloud-ml.log.*
 target/
 ./idea
 .vscode/

@@ -30,11 +30,13 @@ public class DomainService extends SeaCommon {
 
     @Value("${ml.client.domain.file.path:/}")
     private String exportDomainDir;
+    @Value("${ml.client.domain.file.allname:/}")
+    private String exportAllDomainFilename;
 
     /**
      * 导入域名文件 → 小写 + 去重 + 最多10线程 + 监控进度 + 每个线程插入数据完成才结束
      */
-    public void importDomainFile(MultipartFile file) {
+    public int importDomainFile(MultipartFile file) {
         // 1. 读取文件 → 小写 → 去重
         Set<String> domainSet = new HashSet<>();
         try (BufferedReader reader = new BufferedReader(
@@ -88,7 +90,7 @@ public class DomainService extends SeaCommon {
                 // 提交线程池
                 handlerExecutor.execHandler(factory, progressManager, task);
             }
-
+            return domainList.size();
         } catch (Exception e) {
             GlobalTaskManager.releaseSegment(taskKey);
             throw new RuntimeException("域名导入任务失败", e);
@@ -96,10 +98,18 @@ public class DomainService extends SeaCommon {
     }
 
     /**
+     * 导出域名数据 按域名分文件
+     */
+    public String exportDomainData(List<String> inputDomainList) {
+        domainInoutService.exportDomainData(inputDomainList, exportDomainDir);
+        return exportDomainDir;
+    }
+    /**
      * 导出域名数据
      */
-    public void exportDomainData(List<String> inputDomainList) {
-        domainInoutService.exportDomainData(inputDomainList, exportDomainDir);
+    public String exportAllDomainData() {
+        domainInoutService.exportAllDomainData(exportAllDomainFilename);
+        return exportAllDomainFilename;
     }
 
     public void test(List<String> domainList) {

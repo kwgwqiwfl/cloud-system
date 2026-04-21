@@ -2,7 +2,6 @@ package com.ring.cloud.facade.support;
 
 import com.ring.cloud.facade.crawl.ProxyUtil;
 import com.ring.cloud.facade.entity.proxy.ProxyIp;
-import com.ring.cloud.facade.frame.RetryTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,34 +18,15 @@ import java.util.stream.Stream;
 public class ProxyApiClient {
     @Autowired
     protected RestTemplate restTemplate;
-    @Autowired
-    private RetryTemplate retryTemplate;
 
     @Value("${ml.client.proxy.url:null}")
     private String proxyUrl;
-    @Value("${ml.client.proxy.maxRetry:5}")
-    private int maxRetry;
-    @Value("${ml.client.proxy.intervalSec:5}")
-    private int intervalSec;
-
 
     /**
      * 重试获取多个代理
      */
     public List<ProxyIp> proxyIpListNoRetry() {
         return doGetProxyIpList();
-    }
-
-    /**
-     * 重试获取多个代理
-     */
-    public List<ProxyIp> proxyIpListWithRetry() {
-        return retryTemplate.execute(
-                maxRetry,
-                intervalSec,
-                this::doGetProxyIpList,
-                "查询代理IP"
-        );
     }
 
     private List<ProxyIp> doGetProxyIpList() {
@@ -66,18 +46,6 @@ public class ProxyApiClient {
                     return proxyIp;
                 })
                 .collect(Collectors.toList());
-    }
-
-    /**
-     * 重试获取代理
-     */
-    public ProxyIp proxyIpWithRetry() {
-        return retryTemplate.execute(
-                maxRetry,
-                intervalSec,
-                this::doGetProxyIp,
-                "查询代理IP"
-        );
     }
 
     private ProxyIp doGetProxyIp() {

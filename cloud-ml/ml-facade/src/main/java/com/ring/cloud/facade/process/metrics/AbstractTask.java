@@ -29,8 +29,6 @@ public abstract class AbstractTask<T> implements ITask<T> {
     protected PangIpSupport pangIpServcie;
     @Autowired
     protected GlobalProxyHelper globalProxyHelper;
-    @Autowired
-    protected GlobalProgressManager progressManager;
 
     @Value("${ml.client.ip.file.path:/}")
     protected String ipFilePath;//文件路径
@@ -38,7 +36,7 @@ public abstract class AbstractTask<T> implements ITask<T> {
     protected String ipFileNamePrefix;//文件名前缀
 
     /**
-     * 通用IP采集重试 + 代理切换 + 任务停止
+     * 通用IP 域名等采集重试 + 代理切换 + 任务停止
      */
     protected void retryExecute(
             String uniqueKey,
@@ -46,9 +44,9 @@ public abstract class AbstractTask<T> implements ITask<T> {
             IpBreakpoint breakpoint,
             String key,
             BufferedWriter bw,
-            int maxRetry  // 👈 我给你加上的重试次数参数
+            int maxRetry
     ) {
-        int retryCount = 0;  // 👈 重试计数器
+        int retryCount = 0;
 
         while (true) {
             if (isTaskStopped(uniqueKey)) {
@@ -67,14 +65,14 @@ public abstract class AbstractTask<T> implements ITask<T> {
                 // 失败计数 + 切换代理
                 retryCount++;
                 currentProxy = null;
-                log.debug("【IP】从断点页 {} 继续，失败次数：{}", breakpoint.getCurrentPage(), retryCount);
+                log.debug("【】从断点页 {} 继续，失败次数：{}", breakpoint.getCurrentPage(), retryCount);
 
                 if (retryCount >= maxRetry) {
-                    log.warn("【IP】查询失败，忽略，重试次数：{}", maxRetry);
+                    log.warn("【】查询失败，忽略重试：{} -- {}", key, maxRetry);
                     return;
                 }
             } catch (Throwable e) {
-                retryCount++;  // 👈 异常也计数
+                retryCount++;  //异常计数
                 boolean needSwitch = globalProxyHelper.needSwitchProxy(e);
                 if (needSwitch) {
                     currentProxy = null;
@@ -83,9 +81,9 @@ public abstract class AbstractTask<T> implements ITask<T> {
                     log.debug("【目标波动】不切换代理，失败次数：{}", retryCount);
                 }
 
-                // 👈 异常也判断最大次数
+                //异常也判断最大次数
                 if (retryCount >= maxRetry) {
-                    log.debug("【IP】异常次数超限，退出重试：{}", maxRetry);
+                    log.warn("【】异常超限，退出重试：{} -- {}", key, maxRetry);
                     return;
                 }
             }

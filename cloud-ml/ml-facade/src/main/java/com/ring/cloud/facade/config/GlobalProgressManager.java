@@ -12,9 +12,6 @@ public class GlobalProgressManager {
 
     private final ConcurrentHashMap<String, GlobalProgress> progressMap = new ConcurrentHashMap<>();
 
-    /**
-     * 初始化大IP任务进度（在【启动入口】调用）
-     */
     public void initTask(String key, int totalSegments, long totalPageEstimate) {
         GlobalProgress progress = new GlobalProgress();
         progress.setTaskKey(key);
@@ -23,9 +20,6 @@ public class GlobalProgressManager {
         progressMap.put(key, progress);
     }
 
-    /**
-     * 分段任务开始
-     */
     public void onSegmentStart(String key) {
         GlobalProgress progress = progressMap.get(key);
         if (progress != null) {
@@ -33,28 +27,28 @@ public class GlobalProgressManager {
         }
     }
 
-    /**
-     * 分段任务结束（成功/失败/停止都要调）
-     */
     public void onSegmentFinish(String key, int finishedPages) {
         GlobalProgress progress = progressMap.get(key);
         if (progress == null) return;
 
-        progress.getFinishedSegments().incrementAndGet();
+        // 标准 CAS 线程安全 +1，绝不会超量
+        int current;
+        int total = progress.getTotalSegments().get();
+        do {
+            current = progress.getFinishedSegments().get();
+            if (current >= total) {
+                return;
+            }
+        } while (!progress.getFinishedSegments().compareAndSet(current, current + 1));
+
         progress.getCurrentRunning().decrementAndGet();
         progress.getTotalPageFinished().addAndGet(finishedPages);
     }
 
-    /**
-     * 获取进度
-     */
     public GlobalProgress getProgress(String key) {
         return progressMap.get(key);
     }
 
-    /**
-     * 停止任务
-     */
     public void stopTask(String key) {
         GlobalProgress progress = progressMap.get(key);
         if (progress != null) {

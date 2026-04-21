@@ -27,25 +27,6 @@ public interface DomainInoutMapper extends MyIdableMapper<DomainInout> {
             @Param("offset") int offset,
             @Param("pageSize") int pageSize
     );
-
-    /**
-     * 批量UPSERT（有则更新归属地、更新时间，无则插入）
-     */
-    @Insert({
-            "<script>",
-            "INSERT INTO domain_inout (input_domain, output_domain, ip, loc, adtime, uptime) ",
-            "VALUES ",
-            "<foreach collection='list' item='item' separator=','>",
-            "(#{item.inputDomain}, #{item.outputDomain}, #{item.ip}, #{item.loc}, #{item.adtime}, #{item.uptime})",
-            "</foreach>",
-            "ON DUPLICATE KEY UPDATE ",
-            "loc = VALUES(loc), ",
-            "adtime = VALUES(adtime), ",
-            "uptime = VALUES(uptime)",
-            "</script>"
-    })
-    int batchUpsert(@Param("list") List<DomainInout> list);
-
     /**
      * 按输入域名统计每个输出域名出现的次数（你要的汇算）
      */
@@ -61,7 +42,24 @@ public interface DomainInoutMapper extends MyIdableMapper<DomainInout> {
             @Param("inputDomain") String inputDomain
     );
 
-    // ====================== 这里修复了！！！ ======================
+    /**
+     * 批量UPSERT（有则更新归属地、更新时间，无则插入）
+     */
+    @Insert({
+            "<script>",
+            "INSERT INTO domain_inout (input_domain, output_domain, ip, loc, adtime, uptime, input_hash, output_hash) ",
+            "VALUES ",
+            "<foreach collection='list' item='item' separator=','>",
+            "(#{item.inputDomain}, #{item.outputDomain}, #{item.ip}, #{item.loc}, #{item.adtime}, #{item.uptime}, #{item.inputHash}, #{item.outputHash})",
+            "</foreach>",
+            "ON DUPLICATE KEY UPDATE ",
+            "loc = VALUES(loc), ",
+            "adtime = VALUES(adtime), ",
+            "uptime = VALUES(uptime)",
+            "</script>"
+    })
+    int batchUpsert(@Param("list") List<DomainInout> list);
+
     @Select({
             "<script>",
             "SELECT ",
@@ -69,16 +67,34 @@ public interface DomainInoutMapper extends MyIdableMapper<DomainInout> {
             "  output_domain    AS outputDomain, ",
             "  COUNT(*)         AS count ",
             "FROM domain_inout ",
-            "<if test=\"list != null and list.size() &lt;= 100\">", // 👈 修复这里
-            "WHERE input_domain IN ",
-            "<foreach collection='list' open='(' separator=',' close=')' item='item'>",
+
+            "<if test=\"hashList != null and !hashList.isEmpty()\">",
+            "WHERE input_hash IN ",
+            "<foreach collection='hashList' open='(' separator=',' close=')' item='item'>",
             "#{item}",
             "</foreach>",
             "</if>",
-            "GROUP BY input_domain, output_domain ",
+
+            "GROUP BY input_hash, output_hash, input_domain, output_domain ",
             "ORDER BY input_domain, count DESC",
             "</script>"
     })
     @Options(fetchSize = Integer.MIN_VALUE)
-    List<DomainCount> exportStatStream(@Param("list") List<String> inputDomainList);
+    List<DomainCount> exportStatStream(
+            @Param("hashList") List<String> hashList
+    );
+
+    @Select({
+            "<script>",
+            "SELECT ",
+            "  input_domain     AS inputDomain, ",
+            "  output_domain    AS outputDomain, ",
+            "  COUNT(*)         AS count ",
+            "FROM domain_inout ",
+            "GROUP BY input_hash, output_hash, input_domain, output_domain ",
+            "ORDER BY input_domain, count DESC",
+            "</script>"
+    })
+    @Options(fetchSize = Integer.MIN_VALUE)
+    List<DomainCount> exportAllStatStream();
 }

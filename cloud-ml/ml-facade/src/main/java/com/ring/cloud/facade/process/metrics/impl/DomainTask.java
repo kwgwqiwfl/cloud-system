@@ -48,8 +48,6 @@ public class DomainTask extends AbstractTask<TaskEntity> {
         } catch (Throwable e) {
             log.error("[域名批量-异常] 域名数量={} 异常：{}",
                     domainList.size(), e.getMessage(), e);
-            // 失败：进度+0
-            progressManager.onSegmentFinish(uniqueKey, 0);
             return false;
         }
     }
@@ -89,12 +87,9 @@ public class DomainTask extends AbstractTask<TaskEntity> {
                 log.info("{} -- {} -- {} -- cost:{}", domain, ipFilterSet.size(), resultSize, cost);
                 WsUtil.push(WsMessageType.DOMAIN_TASK, "域名："+ domain+" -- "+ipFilterSet.size()+" -- "+resultSize+" -- cost:"+cost);
             }
-            // 标记完成：上报本次处理的域名数量
-            progressManager.onSegmentFinish(uniqueKey, domainSize);
             return true;
         } catch (Throwable e) {
             log.error("[域名批量-执行异常]", e);
-            progressManager.onSegmentFinish(uniqueKey, 0);
             return false;
         }
     }

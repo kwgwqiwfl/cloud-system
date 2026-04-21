@@ -37,13 +37,13 @@ public class IpUtil {
     }
 
     //生成ip domain url 分页查询 url="https://site.ip138.com/index/querybyip/?ip=1.1.1.1&page=2&token=2ea08c94ef895a05b7df3182717f8dc2";
-    public static String buildIpUrlPage(int page, String ip, String ipBaseUrl, String ipPageInfix, String dynamicToken) {
-        return ipBaseUrl + "/" + ipPageInfix + "/?ip=" + ip + "&page=" + page + "&token=" + dynamicToken;
+    public static String buildIpUrlPage(int page, String ip, String ipBaseUrl, String dynamicToken) {
+        return ipBaseUrl + "/index/querybyip/?ip=" + ip + "&page=" + page + "&token=" + dynamicToken;
     }
 
     //生成domain ip url 分页查询 url="https://site.ip138.com/index/querybydomain/?domain=google.cn&page=6&token=1bc656986f10a4666cd98bd166f9afdb";
-    public static String buildDomainUrlPage(int page, String domain, String ipBaseUrl, String domainPageInfix, String dynamicToken) {
-        return ipBaseUrl + "/" + domainPageInfix + "/?domain=" + domain + "&page=" + page + "&token=" + dynamicToken;
+    public static String buildDomainUrlPage(int page, String domain, String ipBaseUrl, String dynamicToken) {
+        return ipBaseUrl + "/index/querybydomain/?domain=" + domain + "&page=" + page + "&token=" + dynamicToken;
     }
 
     //生成ip pangzhan url="https://chapangzhan.com/3.1.1.0/24";
@@ -385,8 +385,13 @@ public class IpUtil {
             if (ip == null) {
                 continue;
             }
+            //跳过指定ip
             if(SpecifyIpSchedule.IP_SET.contains(ip))
                 continue;
+            //跳过内网ip
+            if (isInternalIp(ip)) {
+                continue;
+            }
             // 过滤黑名单前缀
             boolean isFilter = FILTER_PREFIX_SET.stream().anyMatch(ip::startsWith);
             if (!isFilter) {

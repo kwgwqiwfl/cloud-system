@@ -3,6 +3,7 @@ package com.ring.cloud.core.pojo;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.ring.cloud.core.util.DateUtil;
+import com.ring.cloud.core.util.HashUtil;
 import com.ring.cloud.core.util.IpCoreUtils;
 import com.ring.welkin.common.core.jackson.deserializer.DateJsonDeserializer;
 import com.ring.welkin.common.persistence.mybatis.type.routing.DateTypeRoutingHandler;
@@ -41,15 +42,27 @@ public class DomainInout extends AbstractStar {
 
     @ApiModelProperty("输入域名")
     @Comment("输入域名")
-    @Column(length = 191)
+    @Column(length = 255)
     @ColumnType(jdbcType = JdbcType.VARCHAR)
     private String inputDomain;
 
     @ApiModelProperty("输出域名")
     @Comment("输出域名")
-    @Column(length = 191)
+    @Column(length = 255)
     @ColumnType(jdbcType = JdbcType.VARCHAR)
     private String outputDomain;
+
+    @ApiModelProperty("输入域名SHA1哈希")
+    @Comment("输入域名SHA1哈希")
+    @Column(length = 40)
+    @ColumnType(jdbcType = JdbcType.VARCHAR)
+    private String inputHash;
+
+    @ApiModelProperty("输出域名SHA1哈希")
+    @Comment("输出域名SHA1哈希")
+    @Column(length = 40)
+    @ColumnType(jdbcType = JdbcType.VARCHAR)
+    private String outputHash;
 
     @ApiModelProperty(value = "创建时间", required = false, accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     @Comment("创建时间")
@@ -72,7 +85,17 @@ public class DomainInout extends AbstractStar {
         this.ip = ip;
         this.loc = loc;
         this.outputDomain = outputDomain;
+        this.outputHash = HashUtil.sha1(outputDomain);
         this.adtime = DateUtil.parseDate(adtime);
         this.uptime = DateUtil.parseDate(uptime);
+    }
+
+    public void setInputDomain(String inputDomain) {
+        this.inputDomain = inputDomain;
+        this.inputHash = HashUtil.sha1(inputDomain);
+    }
+    public void setOutputDomain(String outputDomain) {
+        this.outputDomain = outputDomain;
+        this.outputHash = HashUtil.sha1(outputDomain);
     }
 }

@@ -6,6 +6,7 @@ import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.RejectedExecutionException;
 
 @Slf4j
 @Component
@@ -27,6 +28,11 @@ public class WebSocketEndpoint {
 
     @OnError
     public void onError(Session session, Throwable e) {
+        // 忽略服务关闭时的线程终止异常，不打印错误日志
+        if (e instanceof RejectedExecutionException ||
+                (e.getMessage() != null && e.getMessage().contains("XNIO007007"))) {
+            return;
+        }
         log.error("[WebSocket] 异常", e);
     }
 

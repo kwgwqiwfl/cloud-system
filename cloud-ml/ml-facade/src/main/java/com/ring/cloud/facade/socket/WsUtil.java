@@ -3,6 +3,7 @@ package com.ring.cloud.facade.socket;
 import com.alibaba.fastjson.JSON;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.RejectedExecutionException;
 
 /**
  * 通用websocket推送类
@@ -25,7 +26,11 @@ public class WsUtil {
                 if (session.isOpen()) {
                     session.getBasicRemote().sendText(json);
                 }
-            } catch (Exception ignored) {}
+            } catch (RejectedExecutionException e) {
+                // 服务关闭时的线程终止异常，直接忽略
+            } catch (Exception ignored) {
+                // 其他异常静默处理
+            }
         });
     }
 }

@@ -38,10 +38,6 @@ public abstract class IpBaseExecutor {
 
     @Value("${ml.client.desc.ip.domain:null}")
     protected String ipBaseUrl;
-    @Value("${ml.client.desc.ip.page.infix:null}")
-    protected String ipPageInfix;
-    @Value("${ml.client.desc.domain.page.infix:null}")
-    protected String domainPageInfix;
     @Value("${ml.client.domain.subdomain:null}")
     protected String subdomainUrl;
 
@@ -87,7 +83,7 @@ public abstract class IpBaseExecutor {
                 break;
             }
 
-            String url = IpUtil.buildIpUrlPage(page, currentIp, ipBaseUrl, ipPageInfix, info.getToken());
+            String url = IpUtil.buildIpUrlPage(page, currentIp, ipBaseUrl, info.getToken());
             IpPageResponse resp = ipNextPage(proxy, url, info.getToken());
 
             List<?> pageList = parseApiPage(resp.getData(),
@@ -143,7 +139,7 @@ public abstract class IpBaseExecutor {
         // 翻页
         while (hasMore && breakpoint.getCurrentPage() <= maxPage) {
             int page = breakpoint.getCurrentPage();
-            String url = IpUtil.buildDomainUrlPage(page, domain, ipBaseUrl, domainPageInfix, token);
+            String url = IpUtil.buildDomainUrlPage(page, domain, ipBaseUrl, token);
             DomainPageResponse resp = domainNextPage(proxy, url, token);
 
             List<T> pageList = parseApiPage(resp.getData(),

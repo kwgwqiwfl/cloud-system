@@ -24,7 +24,7 @@ public class TaskHandler implements IHandler {
         this.factory = factory;
         this.progressManager = progressManager;
         this.taskEntity = ipTaskEntity;
-        ipTaskEntity.setStartTime(System.currentTimeMillis());
+        taskEntity.setStartTime(System.currentTimeMillis());
     }
 
     @Override
@@ -35,7 +35,6 @@ public class TaskHandler implements IHandler {
         return status;
     }
 
-    // ====================== 构建任务标识（只写1次）======================
     private TaskIdentity buildTaskIdentity(String taskType) {
         boolean isLargeIp = TaskTypeEnum.IP_DOMAIN_LARGE.name().equals(taskType);
         boolean isSmallIp = TaskTypeEnum.IP_SINGLE.name().equals(taskType);
@@ -71,11 +70,9 @@ public class TaskHandler implements IHandler {
         identity.setLargeIpTask(isLargeIp);
         identity.setSmallIpTask(isSmallIp);
         identity.setDomainBatchTask(isDomainBatch);
-
         return identity;
     }
 
-    // ====================== 执行任务 ======================
     private boolean executeTask(TaskIdentity identity) {
         log.info("任务开始，唯一标识={}", identity.getUniqueKey());
         try {
@@ -88,39 +85,42 @@ public class TaskHandler implements IHandler {
         }
     }
 
-    // ====================== 统一完成逻辑（只写1遍，全复用）======================
     private void finishTask(TaskIdentity identity, boolean status) {
         String uniqueKey = identity.getUniqueKey();
         String lockKey = identity.getLockKey();
 
         try {
-            // 日志推送
             long cost = System.currentTimeMillis() - taskEntity.getStartTime();
             log.info("任务结束 唯一标识={} 状态：{} 耗时：{}ms", uniqueKey, status, cost);
             WsUtil.push(WsMessageType.TASK, uniqueKey + "任务完成。耗时：" + cost + "ms");
 
-            // ====================== 统一逻辑：所有批量任务只走这里 ======================
+            // ====================== 批量任务：统一计数 + 最后释放锁 ======================
             if (identity.isNeedFinishAllRelease()) {
-                // 自动计算完成数量
-                int finishedCount = identity.isLargeIpTask()
-                        ? taskEntity.getEndPage() - taskEntity.getStartPage() + 1
-                        : taskEntity.getHandleKeyList().size();
+                // 每个线程 成功/失败 都只计数1次（标准用法）
+                progressManager.onSegmentFinish(lockKey, 1);
 
-                progressManager.onSegmentFinish(lockKey, finishedCount);
-
-                // 全部完成 → 统一释放锁
                 GlobalProgress progress = progressManager.getProgress(lockKey);
-                if (progress != null && progress.getFinishedSegments().get() == progress.getTotalSegments().get()) {
-                    log.info("==========================================================");
-                    log.info("✅ 任务全部完成，释放全局锁：{}", lockKey);
-                    log.info("==========================================================");
-                    GlobalTaskManager.releaseSegment(lockKey);
+                if (progress != null) {
+                    // 推送前端进度
+                    String msg = "任务进度：" + progress.getFinishedSegments().get() + "/" + progress.getTotalSegments().get();
+                    WsUtil.push(WsMessageType.DOMAIN_TASK, msg);
+
+                    // 只有全部完成 + 第一个抢到标记的线程 才释放锁
+                    if (progress.getFinishedSegments().get() == progress.getTotalSegments().get()) {
+                        if (progress.getReleased().compareAndSet(false, true)) {
+                            log.info("==========================================================");
+                            log.info("✅ 批量任务全部执行完成，释放全局锁：{}", lockKey);
+                            log.info("==========================================================");
+                            GlobalTaskManager.releaseSegment(lockKey);
+                        }
+                    }
                 }
             }
-
-            // ====================== 立即释放：小IP、SEG ======================
-            else if (lockKey != null) {
-                GlobalTaskManager.releaseSegment(lockKey);
+            // ====================== 普通单线程任务：立即释放 ======================
+            else {
+                if (lockKey != null) {
+                    GlobalTaskManager.releaseSegment(lockKey);
+                }
             }
 
         } finally {

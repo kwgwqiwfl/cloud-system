@@ -28,4 +28,6 @@ public interface DomainInoutService extends BaseIdableService<Long, DomainInout>
      * 批量导出汇总
      */
     void exportDomainData(List<String> inputDomainList, String exportDirPath);
+
+    void exportAllDomainData(String fullFilePath);
 }

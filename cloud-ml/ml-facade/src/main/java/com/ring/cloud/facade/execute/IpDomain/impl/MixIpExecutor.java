@@ -41,10 +41,11 @@ public class MixIpExecutor extends IpBaseExecutor {
             List<String> icpStrList     = extractList(doc, "最新备案查询");
             List<String> subStrList     = extractList(doc, "最新子域名查询");
 
-            List<MlDomain> domainList   = domainStrList.stream().map(MlDomain::new).collect(Collectors.toList());
+            // 一次流完成：过滤 + 转换 → 最高效率
+            List<MlDomain> domainList   = domainStrList.stream().filter(s -> s.length() <= 191).map(MlDomain::new).collect(Collectors.toList());
             List<MlIp> ipList           = ipStrList.stream().map(MlIp::new).collect(Collectors.toList());
-            List<MlIcp> icpList         = icpStrList.stream().map(MlIcp::new).collect(Collectors.toList());
-            List<MlSubdomain> subList   = subStrList.stream().map(MlSubdomain::new).collect(Collectors.toList());
+            List<MlIcp> icpList         = icpStrList.stream().filter(s -> s.length() <= 191).map(MlIcp::new).collect(Collectors.toList());
+            List<MlSubdomain> subList   = subStrList.stream().filter(s -> s.length() <= 191).map(MlSubdomain::new).collect(Collectors.toList());
 
             MixIpInfo info = new MixIpInfo();
             info.setDomainList(domainList);

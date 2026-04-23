@@ -46,6 +46,9 @@ public class MixIpQueryService extends SeaCommon {
     @Autowired
     private MixDomainIpService mixDomainIpService;
 
+    @Autowired
+    private MlDomainAiService mlDomainAiService;
+
     public PageResult<MlIp> pageIp(CommonPageQuery query) {
         return mlIpService.pageList(query);
     }
@@ -91,7 +94,22 @@ public class MixIpQueryService extends SeaCommon {
         specifyIpSchedule.execute();
     }
 
+    //ai domain定时查询任务
+    public String mlDomainAi() {
+        long start = System.currentTimeMillis();
+        List<MlDomainAi> domainAis = mixIpImpl.queryDomainAi();
+        long first = System.currentTimeMillis();
+        if (domainAis == null)
+            throw new IllegalArgumentException("切换7次代理查询ai失败");
+        saveOrUpdateDomainAi(domainAis);
+        return (first-start)+"-"+(System.currentTimeMillis()-first);
 
+    }
+    @Transactional(rollbackFor = Exception.class)
+    public void saveOrUpdateDomainAi(List<MlDomainAi> domainAis) {
+        mlDomainAiService.batchSaveOrUpdate(domainAis);
+    }
+    //ip最新查询定时任务
     public String mixIpStatistics() {
         long start = System.currentTimeMillis();
         MixIpInfo info = mixIpImpl.queryMix();
@@ -100,13 +118,13 @@ public class MixIpQueryService extends SeaCommon {
             throw new IllegalArgumentException("切换5次代理查询mix失败");
         queryMixExt(info);
         long second = System.currentTimeMillis();
-        saveAllSixTables(info);
+        saveAllMixTables(info);
         return (first-start)+"-"+(second-first)+"-"+(System.currentTimeMillis()-second);
 
     }
     // 【内层：纯DB操作】事务只包裹数据库操作！！
     @Transactional(rollbackFor = Exception.class)
-    public void saveAllSixTables(MixIpInfo info) {
+    public void saveAllMixTables(MixIpInfo info) {
         if (info.getIpList() != null) {
             mlIpService.batchSaveOrUpdate(info.getIpList());
         }

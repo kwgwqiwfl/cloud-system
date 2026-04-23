@@ -25,8 +25,27 @@ public class MixIpExecutor extends IpBaseExecutor {
 
     @Value("${ml.client.desc.ip.domain:}")
     protected String mixUrl;
+    @Value("${ml.client.desc.ai.domain:}")
+    protected String aiUrl;
 
-    // 原有逻辑完全保留
+    // ai domain 最新查询
+    public List<MlDomainAi> queryDoaminAi() {
+        ProxyIp proxy = globalProxyHelper.getAvailableProxy();
+        String content = null;
+        try {
+            content = okProxyIp.doProxyRequest(proxy.getIp(), proxy.getPort(), aiUrl, "");
+            if (content == null || content.trim().isEmpty())
+                throw new IllegalArgumentException("返回内容为空");
+
+            Document doc = Jsoup.parse(content);
+            List<String> domainList  = extractAiList(doc, "最近查询");
+            return domainList.stream().map(MlDomainAi::new).collect(Collectors.toList());
+        }finally {
+            content = null;
+        }
+    }
+
+    // ip 最新查询 4项
     public MixIpInfo queryMixInfo() {
         ProxyIp proxy = globalProxyHelper.getAvailableProxy();
         String content = null;
@@ -36,10 +55,10 @@ public class MixIpExecutor extends IpBaseExecutor {
                 throw new IllegalArgumentException("返回内容为空");
 
             Document doc = Jsoup.parse(content);
-            List<String> domainStrList  = extractList(doc, "最新域名查询");
-            List<String> ipStrList      = extractList(doc, "最新iP查询");
-            List<String> icpStrList     = extractList(doc, "最新备案查询");
-            List<String> subStrList     = extractList(doc, "最新子域名查询");
+            List<String> domainStrList  = extractIpList(doc, "最新域名查询");
+            List<String> ipStrList      = extractIpList(doc, "最新iP查询");
+            List<String> icpStrList     = extractIpList(doc, "最新备案查询");
+            List<String> subStrList     = extractIpList(doc, "最新子域名查询");
 
             // 一次流完成：过滤 + 转换 → 最高效率
             List<MlDomain> domainList   = domainStrList.stream().filter(s -> s.length() <= 191).map(MlDomain::new).collect(Collectors.toList());
@@ -90,8 +109,8 @@ public class MixIpExecutor extends IpBaseExecutor {
         return mixIpRes;
     }
 
-    // 原有工具方法保留
-    private List<String> extractList(Document doc, String title) {
+    // 解析 ip四项
+    private List<String> extractIpList(Document doc, String title) {
         for (Element ul : doc.select("ul")) {
             Element span = ul.select("li.title span").first();
             if (span != null && span.text().contains(title)) {
@@ -99,11 +118,29 @@ public class MixIpExecutor extends IpBaseExecutor {
                 for (Element a : ul.select("li:not(.title) a")) {
                     list.add(a.text().trim());
                 }
-                if (list.isEmpty()) throw new RuntimeException("列表为空: " + title);
+                if (list.isEmpty()) throw new IllegalArgumentException("列表为空: " + title);
                 return list;
             }
         }
-        throw new RuntimeException("提取失败: " + title);
+        throw new IllegalArgumentException("提取失败: " + title);
+    }
+    //解析ai domain
+    private List<String> extractAiList(Document doc, String title) {
+        // 专门匹配爱站网的最近查询模块
+        Element lastSearch = doc.select("div.last-search").first();
+        if (lastSearch == null) {
+            throw new IllegalArgumentException("提取失败，未找到最近查询模块: " + title);
+        }
+
+        List<String> list = new ArrayList<>();
+        for (Element a : lastSearch.select("ul li a")) {
+            list.add(a.text().trim());
+        }
+
+        if (list.isEmpty()) {
+            throw new IllegalArgumentException("最近查询列表为空: " + title);
+        }
+        return list;
     }
 
 }

@@ -20,7 +20,7 @@ public class MlDomain extends AbstractMl {
 
     @ApiModelProperty(value = "域名")
     @Comment("域名")
-    @Column(length = 191, nullable = false)
+    @Column(length = 255, nullable = false)
     private String domain;
 
     public MlDomain() {

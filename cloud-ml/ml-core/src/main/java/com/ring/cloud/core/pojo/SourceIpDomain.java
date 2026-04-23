@@ -40,7 +40,7 @@ public class SourceIpDomain extends AbstractStar {
 
     @ApiModelProperty("绑定过的域名")
     @Comment("绑定过的域名")
-    @Column(length = 256)
+    @Column(length = 255)
     @ColumnType(jdbcType = JdbcType.VARCHAR)
     private String domain;
 

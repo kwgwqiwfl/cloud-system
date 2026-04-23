@@ -1,5 +1,6 @@
 package com.ring.cloud.facade.process.metrics.impl;
 
+import com.ring.cloud.core.pojo.MlDomainAi;
 import com.ring.cloud.facade.common.QueryType;
 import com.ring.cloud.facade.common.TaskTypeEnum;
 import com.ring.cloud.facade.entity.ip.*;
@@ -10,6 +11,8 @@ import com.ring.cloud.facade.process.metrics.AbstractTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Slf4j
 @Component
@@ -23,6 +26,18 @@ public class MixIpImpl extends AbstractTask<MixIpInfo> implements StopCondition 
     @Autowired
     private MixIpExecutor mixIpExecutor;
 
+    /**
+     * 查询ai domain
+     */
+    public List<MlDomainAi> queryDomainAi() {
+        return queryWithRetry(
+                null,
+                null,
+                7,
+                (key, proxy) -> mixIpExecutor.queryDoaminAi(),
+                (key) -> null
+        );
+    }
     /**
      * 统一查询所有IP/域名/ICP/子域名数据
      */

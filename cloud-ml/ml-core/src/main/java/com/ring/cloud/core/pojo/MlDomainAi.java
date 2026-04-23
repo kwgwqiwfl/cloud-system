@@ -2,14 +2,12 @@ package com.ring.cloud.core.pojo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.ring.cloud.core.util.DateUtil;
-import com.ring.cloud.core.util.IpCoreUtils;
+import com.ring.cloud.core.util.HashUtil;
 import com.ring.welkin.common.core.jackson.deserializer.DateJsonDeserializer;
 import com.ring.welkin.common.persistence.mybatis.type.routing.DateTypeRoutingHandler;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.apache.ibatis.type.JdbcType;
 import org.hibernate.annotations.Comment;
 import tk.mybatis.mapper.annotation.ColumnType;
@@ -20,68 +18,60 @@ import javax.persistence.Table;
 import java.util.Date;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
 @ApiModel
 @Entity
-@Table(name = "mix_domain_ip")
-@Comment("域名IP关系表")
-public class MixDomainIp extends AbstractStar {
+@Table(name = "ml_domain_ai")
+@Comment("域名查询记录表")
+public class MlDomainAi extends AbstractStar {
 
-    @ApiModelProperty(value = "IP地址")
-    @Comment("IP地址")
-    @Column(length = 50, nullable = false)
-    @ColumnType(jdbcType = JdbcType.VARCHAR)
-    private String ip;
-
-    @ApiModelProperty(value = "ip整型")
-    @Comment("ip整型")
-    @Column
-    @ColumnType(jdbcType = JdbcType.BIGINT)
-    private Long ipLong;
+    private static final long serialVersionUID = -1L;
 
     @ApiModelProperty(value = "域名")
     @Comment("域名")
     @Column(length = 255, nullable = false)
-    @ColumnType(jdbcType = JdbcType.VARCHAR)
     private String domain;
 
-    @ApiModelProperty(value = "域名CRC32")
-    @Comment("域名CRC32")
-    @Column(nullable = false)
-    @ColumnType(jdbcType = JdbcType.INTEGER)
-    private Integer domainCrc;
+    @ApiModelProperty(value = "域名哈希值")
+    @Comment("域名哈希值")
+    @Column(length = 40, nullable = false)
+    private String domainHash;
 
     @ApiModelProperty(value = "创建时间")
     @Comment("创建时间")
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     @ColumnType(jdbcType = JdbcType.DATE, typeHandler = DateTypeRoutingHandler.class)
     @JsonDeserialize(using = DateJsonDeserializer.class)
-    private Date adtime;
+    private Date adTime;
 
     @ApiModelProperty(value = "更新时间")
     @Comment("更新时间")
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     @ColumnType(jdbcType = JdbcType.DATE, typeHandler = DateTypeRoutingHandler.class)
     @JsonDeserialize(using = DateJsonDeserializer.class)
-    private Date uptime;
+    private Date upTime;
 
-    public void setDomain(String domain) {
+    @ApiModelProperty(value = "累计查询次数")
+    @Comment("累计查询次数")
+    @Column(nullable = false)
+    private Integer totalCount;
+
+    @ApiModelProperty(value = "按天查询次数")
+    @Comment("按天查询次数")
+    @Column(nullable = false)
+    private Integer dayCount;
+
+    public MlDomainAi() {
+    }
+
+    /**
+     * domain初始化
+     */
+    public MlDomainAi(String domain) {
         this.domain = domain;
-        this.domainCrc = IpCoreUtils.crc32(domain);
-    }
-
-    public void setIpString(String ip) {
-        this.ip = ip;
-        this.ipLong = IpCoreUtils.ipToLong(ip);
-    }
-
-    public MixDomainIp() {
-    }
-
-    public MixDomainIp(String ip, String domain, String adtime, String uptime) {
-        this.setIpString(ip);
-        this.setDomain(domain);
-        this.adtime = DateUtil.parseDate(adtime);
-        this.uptime = DateUtil.parseDate(uptime);
+        this.domainHash = HashUtil.sha1(domain);
+        this.adTime = new Date();
+        this.upTime = new Date();
+        this.totalCount = 1;
+        this.dayCount = 1;
     }
 }

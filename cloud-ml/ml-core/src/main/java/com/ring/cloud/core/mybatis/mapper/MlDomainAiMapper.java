@@ -18,8 +18,8 @@ public interface MlDomainAiMapper extends MyIdableMapper<MlDomainAi> {
             + "</foreach>"
             + "ON DUPLICATE KEY UPDATE "
             + "total_count = total_count + 1, "
-            + "day_count = IF(up_time = CURDATE(), day_count + 1, 1), "
-            + "up_time = CURDATE()"
+            + "day_count = IF(up_time != CURDATE(), day_count + 1, day_count), "
+            + "up_time = IF(up_time != CURDATE(), CURDATE(), up_time)"
             + "</script>")
     void batchSaveOrUpdate(@Param("list") List<MlDomainAi> list);
 }

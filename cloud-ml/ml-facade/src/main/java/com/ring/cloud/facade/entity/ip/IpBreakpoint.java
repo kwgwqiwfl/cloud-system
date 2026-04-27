@@ -17,6 +17,9 @@ public class IpBreakpoint {
     private Set<String> set = new HashSet<>();
     private List<Object> list = new ArrayList<>();
 
+    private String key;//keyword 当前关键词
+    private int level=0;//keyword 递归层级
+
     public void addCurrentCount(int num) { this.currentCount += num; }
 
     public void reset() {
@@ -24,5 +27,6 @@ public class IpBreakpoint {
         this.currentCount = 0;
         this.set.clear();
         this.list.clear();
+        this.level = 0;
     }
 }

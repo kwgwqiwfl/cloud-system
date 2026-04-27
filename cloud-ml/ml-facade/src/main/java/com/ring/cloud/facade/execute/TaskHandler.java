@@ -40,6 +40,9 @@ public class TaskHandler implements IHandler {
         boolean isSmallIp = TaskTypeEnum.IP_SINGLE.name().equals(taskType);
         boolean isDomainBatch = TaskTypeEnum.DOMAIN.name().equals(taskType);
 
+        // ====================== 【只加这一行】KEYWORD 批量任务和 DOMAIN 保持一致 ======================
+        boolean isKeywordBatch = TaskTypeEnum.KEYWORD.name().equals(taskType);
+
         String uniqueKey;
         String lockKey = null;
 
@@ -57,6 +60,11 @@ public class TaskHandler implements IHandler {
             lockKey = "domain_import_task";
             uniqueKey = taskType + ":thread_" + Thread.currentThread().getId();
         }
+        // ====================== 【只加这一块】KEYWORD 批量任务配置 ======================
+        else if (isKeywordBatch) {
+            lockKey = "key_import_task";
+            uniqueKey = taskType + ":thread_" + Thread.currentThread().getId();
+        }
         else {
             String segNo = taskEntity.getIpSegment().getSegmentNo();
             uniqueKey = taskType + ":" + segNo;
@@ -70,6 +78,10 @@ public class TaskHandler implements IHandler {
         identity.setLargeIpTask(isLargeIp);
         identity.setSmallIpTask(isSmallIp);
         identity.setDomainBatchTask(isDomainBatch);
+
+        // ====================== 【只加这一行】标记 KEYWORD 批量任务 ======================
+        identity.setKeywordBatchTask(isKeywordBatch);
+
         return identity;
     }
 
@@ -103,7 +115,15 @@ public class TaskHandler implements IHandler {
                 if (progress != null) {
                     // 推送前端进度
                     String msg = "任务进度：" + progress.getFinishedSegments().get() + "/" + progress.getTotalSegments().get();
-                    WsUtil.push(WsMessageType.DOMAIN_TASK, msg);
+
+                    // 判断是域名还是关键词任务（不影响逻辑）
+                    if(identity.isDomainBatchTask()){
+                        WsUtil.push(WsMessageType.DOMAIN_TASK, msg);
+                    }
+                    // ====================== 【只加这一段】KEYWORD 进度推送 ======================
+                    else if(identity.isKeywordBatchTask()){
+                        WsUtil.push(WsMessageType.KEYWORD_TASK, msg);
+                    }
 
                     // 只有全部完成 + 第一个抢到标记的线程 才释放锁
                     if (progress.getFinishedSegments().get() == progress.getTotalSegments().get()) {

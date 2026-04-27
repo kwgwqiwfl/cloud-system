@@ -1,6 +1,5 @@
 package com.ring.cloud.facade.process.metrics;
 
-import com.ring.cloud.facade.config.GlobalProgressManager;
 import com.ring.cloud.facade.config.GlobalTaskManager;
 import com.ring.cloud.facade.entity.ip.IpBreakpoint;
 import com.ring.cloud.facade.entity.proxy.ProxyIp;
@@ -12,10 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
@@ -65,7 +61,7 @@ public abstract class AbstractTask<T> implements ITask<T> {
                 // 失败计数 + 切换代理
                 retryCount++;
                 currentProxy = null;
-                log.debug("【】从断点页 {} 继续，失败次数：{}", breakpoint.getCurrentPage(), retryCount);
+                log.debug("【】从断点 {} 继续，失败次数：{}", breakpoint.getCurrentPage(), retryCount);
 
                 if (retryCount >= maxRetry) {
                     log.warn("【】查询失败，忽略重试：{} -- {}", key, maxRetry);
@@ -157,20 +153,36 @@ public abstract class AbstractTask<T> implements ITask<T> {
     }
 
     /**
-     * 关闭流并重命名文件
+     * 关闭流并重命名文件 文件路径
      */
-    protected void closeCsv(BufferedWriter bw, String tmpPath, String csvPath, boolean isBatchComplete) throws IOException {
+    protected void closeFileAndRenameByPath(BufferedWriter bw, String tmpPath, String csvPath, boolean isBatchComplete) throws IOException {
         try {
             if (bw != null) {
                 bw.flush();
                 bw.close();
             }
         } catch (Exception ex) {
-            log.error("关闭CSV文件流失败", ex);
+            log.error("关闭文件流失败", ex);
         }
 
         if (isBatchComplete) {
-            FileUtil.renameTmpToCsv(tmpPath, csvPath);
+            FileUtil.renameTmpToFile(tmpPath, csvPath);
+        }
+    }
+    /**
+     * 关闭流并重命名文件 文件
+     */
+    protected void closeFileAndRenameByFile(BufferedWriter bw, File tmpFile, File finalFile) {
+        try {
+            if (bw != null) {
+                bw.flush();
+                bw.close();
+            }
+        } catch (Exception e) {
+            log.error("关闭文件失败", e);
+        }
+        if (tmpFile.exists()) {
+            tmpFile.renameTo(finalFile);
         }
     }
 

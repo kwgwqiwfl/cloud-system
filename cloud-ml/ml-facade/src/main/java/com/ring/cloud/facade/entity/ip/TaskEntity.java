@@ -25,6 +25,9 @@ public class TaskEntity {
     // domain任务专用字段
     private List<String> handleKeyList;
 
+    // 关键词任务专用字段
+    private String site;
+
     // 原有构造不动
     public TaskEntity() {}
     public TaskEntity(IpSegment ipSegment) {

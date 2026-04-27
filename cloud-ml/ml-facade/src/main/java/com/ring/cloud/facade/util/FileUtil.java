@@ -51,14 +51,15 @@ public class FileUtil {
 		}
 	}
 
-	public static void renameTmpToCsv(String tmpPath, String csvPath) throws IOException {
+	//文件改名
+	public static void renameTmpToFile(String tmpPath, String filePath) throws IOException {
 		File tmpFile = new File(tmpPath);
-		File csvFile = new File(csvPath);
+		File csvFile = new File(filePath);
 
 		// 👇 关键：已存在就删除
 		if (csvFile.exists()) {
 			if (!csvFile.delete()) {
-				throw new IOException("无法删除旧csv文件：" + csvPath);
+				throw new IOException("无法删除旧csv文件：" + filePath);
 			}
 		}
 

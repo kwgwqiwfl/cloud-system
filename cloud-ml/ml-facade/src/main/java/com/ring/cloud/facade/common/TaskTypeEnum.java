@@ -10,6 +10,7 @@ public enum TaskTypeEnum {
     IP_SINGLE,//小ip 单任务模式
     IP_DOMAIN_LARGE,//大IP分段模式
     DOMAIN,//域名模式
+    KEYWORD,//域名模式
     DEFAULT;
 
 }

@@ -37,64 +37,7 @@ public class DomainService extends SeaCommon {
      * 导入域名文件 → 小写 + 去重 + 最多10线程 + 监控进度 + 每个线程插入数据完成才结束
      */
     public int importDomainFile(MultipartFile file) {
-        // 1. 读取文件 → 小写 → 去重
-        Set<String> domainSet = new HashSet<>();
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String domain = line.trim().toLowerCase();
-                if (!domain.isEmpty()) {
-                    domainSet.add(domain);
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("导入文件读取失败", e);
-        }
-
-        List<String> domainList = new ArrayList<>(domainSet);
-        if (domainList.isEmpty()) {
-            throw new RuntimeException("文件中无有效域名");
-        }
-
-        // ====================== 全局导入任务防重 ======================
-        String taskKey = "domain_import_task";
-        if (GlobalTaskManager.isSegmentRunning(taskKey)) {
-            throw new IllegalArgumentException("域名导入任务正在运行，禁止重复启动");
-        }
-        if (!GlobalTaskManager.occupySegment(taskKey)) {
-            throw new IllegalArgumentException("域名导入任务加锁失败");
-        }
-
-        try {
-            int totalCount = domainList.size();
-            // 最多 10 个线程，不足则用实际数量
-            int threadCount = Math.min(totalCount, 10);
-
-            // ====================== 初始化通用进度 ======================
-            progressManager.initTask(taskKey, threadCount, totalCount);
-
-            int batchSize = totalCount / threadCount;
-
-            // ====================== 平均拆分提交线程 ======================
-            for (int i = 0; i < threadCount; i++) {
-                int start = i * batchSize;
-                int end = (i == threadCount - 1) ? totalCount : (i + 1) * batchSize;
-                List<String> subDomains = domainList.subList(start, end);
-
-                // 只保留你有的字段
-                TaskEntity task = new TaskEntity();
-                task.setTaskType(TaskTypeEnum.DOMAIN.name());
-                task.setHandleKeyList(subDomains);
-
-                // 提交线程池
-                handlerExecutor.execHandler(factory, progressManager, task);
-            }
-            return domainList.size();
-        } catch (Exception e) {
-            GlobalTaskManager.releaseSegment(taskKey);
-            throw new RuntimeException("域名导入任务失败", e);
-        }
+        return commonImportFile(file, TaskTypeEnum.DOMAIN, "domain_import_task", 10);
     }
 
     /**

@@ -66,7 +66,7 @@ public class IpSegTask extends AbstractTask<TaskEntity> implements StopCondition
             return doBatchCrawl(ipSegment, startIp, currentIp, bw, uniqueKey);
         } finally {
             // 统一关闭文件
-            closeCsv(bw, tmpCsvPath, csvPath, true);
+            closeFileAndRenameByPath(bw, tmpCsvPath, csvPath, true);
         }
     }
     // 核心采集循环

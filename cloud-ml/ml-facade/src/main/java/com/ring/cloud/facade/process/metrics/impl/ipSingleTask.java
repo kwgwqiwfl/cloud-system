@@ -60,7 +60,7 @@ public class ipSingleTask extends AbstractTask<TaskEntity> implements StopCondit
 //            crawlSingleIpWithRetry(handleIp, bw, null, breakpoint, uniqueKey);
             return true;
         } finally {
-            closeCsv(bw, tmpCsvPath, csvPath, true);
+            closeFileAndRenameByPath(bw, tmpCsvPath, csvPath, true);
         }
     }
     @Override

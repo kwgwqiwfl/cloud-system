@@ -122,7 +122,9 @@ public class TaskHandler implements IHandler {
                     }
                     // ====================== 【只加这一段】KEYWORD 进度推送 ======================
                     else if(identity.isKeywordBatchTask()){
-                        WsUtil.push(WsMessageType.KEYWORD_TASK, msg);
+                        String site = taskEntity.getSite();
+                        String keywordMsg = "✅ " + site + " 子任务完成 | 总进度：" + progress.getFinishedSegments().get() + "/" + progress.getTotalSegments().get();
+                        WsUtil.push(WsMessageType.KEYWORD_TASK, keywordMsg);
                     }
 
                     // 只有全部完成 + 第一个抢到标记的线程 才释放锁

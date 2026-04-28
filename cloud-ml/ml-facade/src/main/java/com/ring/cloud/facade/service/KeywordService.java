@@ -3,6 +3,8 @@ package com.ring.cloud.facade.service;
 import com.ring.cloud.facade.common.TaskTypeEnum;
 import com.ring.cloud.facade.config.GlobalTaskManager;
 import com.ring.cloud.facade.entity.ip.TaskEntity;
+import com.ring.cloud.facade.socket.WsMessageType;
+import com.ring.cloud.facade.socket.WsUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -49,7 +51,8 @@ public class KeywordService extends SeaCommon {
         if (dataList.isEmpty()) {
             throw new RuntimeException("文件中无有效数据");
         }
-
+        int totalCount = dataList.size();
+        WsUtil.push(WsMessageType.KEYWORD_TASK, "🟢 关键词任务开始 | 总个数：" + totalCount);
         // 全局任务防重
         if (GlobalTaskManager.isSegmentRunning(taskKey)) {
             throw new IllegalArgumentException(TaskTypeEnum.KEYWORD.name() + "导入任务正在运行，禁止重复启动");
@@ -59,7 +62,6 @@ public class KeywordService extends SeaCommon {
         }
 
         try {
-            int totalCount = dataList.size();
             int threadCount = siteList.size();
             progressManager.initTask(taskKey, threadCount, totalCount);
 
@@ -74,8 +76,9 @@ public class KeywordService extends SeaCommon {
 
             return dataList.size();
         } catch (Exception e) {
+            WsUtil.push(WsMessageType.KEYWORD_TASK, "🔴 关键词采集导入失败 | 原因：" + e.getMessage());
             GlobalTaskManager.releaseSegment(taskKey);
-            throw new RuntimeException(TaskTypeEnum.KEYWORD.name() + "导入任务失败：" + e.getMessage(), e);
+            throw new RuntimeException("关键词导入任务失败：" + e.getMessage(), e);
         }
     }
 

@@ -6,6 +6,8 @@ import com.ring.cloud.facade.config.GlobalProgressManager;
 import com.ring.cloud.facade.config.GlobalTaskManager;
 import com.ring.cloud.facade.entity.ip.TaskEntity;
 import com.ring.cloud.facade.execute.TaskHandlerExecutor;
+import com.ring.cloud.facade.socket.WsMessageType;
+import com.ring.cloud.facade.socket.WsUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.multipart.MultipartFile;
@@ -66,6 +68,8 @@ public abstract class SeaCommon {
         if (dataList.isEmpty()) {
             throw new RuntimeException("文件中无有效数据");
         }
+        int totalCount = dataList.size();
+        WsUtil.push(WsMessageType.DOMAIN_TASK, "域名采集启动 总量：" + totalCount);
 
         // ====================== 新增容错：线程数安全限制（1~10） ======================
         if (maxThreadCount < 1) {
@@ -84,7 +88,6 @@ public abstract class SeaCommon {
         }
 
         try {
-            int totalCount = dataList.size();
 
             // ====================== 最终线程数（取 数据量、限制线程数 最小值） ======================
             int threadCount = Math.min(totalCount, maxThreadCount);
@@ -108,6 +111,7 @@ public abstract class SeaCommon {
             }
             return dataList.size();
         } catch (Exception e) {
+            WsUtil.push(WsMessageType.DOMAIN_TASK, "域名采集导入失败！ 信息：" + e.getMessage());
             GlobalTaskManager.releaseSegment(taskKey);
             throw new RuntimeException(taskType.name() + "导入任务失败：" + e.getMessage(), e);
         }

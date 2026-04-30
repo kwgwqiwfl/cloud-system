@@ -50,6 +50,20 @@ public class HttpHeaderUtils {
             "Sec-Fetch-Site", "same-origin"
     );
 
+    // 搜狗 Sogou 官方原生接口
+    public static final Headers SOGOU = Headers.of(
+            "Accept", "application/json, text/plain, */*",
+            "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+            "Origin", "https://www.sogou.com",
+            "Referer", "https://www.sogou.com/",  // ✅ 这个保留，正确
+            "Sec-Fetch-Dest", "empty",
+            "Sec-Fetch-Mode", "cors",
+            "Sec-Fetch-Site", "cross-site",      // ✅ 必须改成 cross-site
+            "sec-ch-ua", "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"",
+            "sec-ch-ua-mobile", "?0",
+            "sec-ch-ua-platform", "\"Windows\""
+    );
+
     // Yandex
     public static final Headers YANDEX = Headers.of(
             "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
@@ -68,6 +82,19 @@ public class HttpHeaderUtils {
             "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
             "Accept", "*/*",
             "Referer", "https://www.google.com/",
+            "Sec-Ch-Ua", "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"",
+            "Sec-Ch-Ua-Mobile", "?0",
+            "Sec-Ch-Ua-Platform", "\"Windows\"",
+            "Sec-Fetch-Dest", "empty",
+            "Sec-Fetch-Mode", "cors",
+            "Sec-Fetch-Site", "same-origin"
+    );
+
+    // Bing 国际版
+    public static final Headers BING_INT = Headers.of(
+            "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+            "Accept", "*/*",
+            "Referer", "https://www.bing.com/",
             "Sec-Ch-Ua", "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"",
             "Sec-Ch-Ua-Mobile", "?0",
             "Sec-Ch-Ua-Platform", "\"Windows\"",

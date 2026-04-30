@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.ring.cloud.facade.entity.proxy.ProxyIp;
 import com.ring.cloud.facade.execute.IpDomain.IpBaseExecutor;
 import com.ring.cloud.facade.frame.OkProxyKeyword;
+import com.ring.cloud.facade.frame.OkProxyPostKeyword;
 import com.ring.cloud.facade.util.KeywordUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,13 +23,23 @@ public class KeywordExecutor extends IpBaseExecutor {
 
     @Autowired
     protected OkProxyKeyword okProxyKeyword;
+    @Autowired
+    protected OkProxyPostKeyword okProxyPostKeyword;
 
     public Set<String> execute(String keyword, String site, ProxyIp proxy) {
         Set<String> resultSet = new LinkedHashSet<>();
 
         try {
             String url = KeywordUtil.buildSuggestUrl(keyword, site);
-            String response = okProxyKeyword.doProxyRequest(proxy.getIp(), proxy.getPort(), url, "");
+            String response;
+            if (site.contains("sogou")) {
+                // 1. 构造搜狗需要的 JSON
+                String jsonBody = buildSogouJson(proxy.getIp(), proxy.getPort(), keyword);
+                // 2. 调用 POST 类
+                response = okProxyPostKeyword.doProxyPostRequest(proxy.getIp(), proxy.getPort(), url, jsonBody, "");
+            } else {
+                response = okProxyKeyword.doProxyRequest(proxy.getIp(), proxy.getPort(), url, "");
+            }
 
             if (response == null || StringUtils.isEmpty(response)) {
                 log.error("[下拉查询] 返回为空 keyword={} site={}", keyword, site);
@@ -38,9 +49,11 @@ public class KeywordExecutor extends IpBaseExecutor {
             // 根据站点分发到独立解析方法
             if (site.contains("baidu")) {
                 parseBaidu(response, resultSet);
-            } else if (site.contains("so.com")) {
+            } else if (site.contains("sogou")) {
+                parseSogou(response, resultSet);
+            }else if (site.contains("so.com")) {
                 parseSo(response, resultSet);
-            } else if (site.contains("bing")) {
+            } else if (site.contains("bing") || site.contains("bingint")) {
                 parseBing(response, resultSet);
             } else if (site.contains("google")) {
                 parseGoogle(response, resultSet);
@@ -150,5 +163,72 @@ public class KeywordExecutor extends IpBaseExecutor {
         } catch (Exception e) {
             log.error("Yandex解析失败", e);
         }
+    }
+
+    // 搜狗 独立解析
+    private void parseSogou(String response, Set<String> resultSet) {
+        try {
+            JSONObject root = JSON.parseObject(response);
+            // 安全获取 data -> items
+            JSONObject data = root.getJSONObject("data");
+            if (data == null) return;
+            JSONArray items = data.getJSONArray("items");
+            if (items == null || items.isEmpty()) return;
+
+            for (int i = 0; i < items.size(); i++) {
+                JSONObject item = items.getJSONObject(i);
+                if (item == null) continue;
+
+                // 安全获取，防止空指针
+                JSONObject card = item.getJSONObject("card");
+                if (card == null) continue;
+                JSONObject sugCard = card.getJSONObject("sug_card");
+                if (sugCard == null) continue;
+
+                String word = sugCard.getString("word");
+                if (word == null || word.isEmpty()) continue;
+
+                String clean = word.replaceAll("[\\p{Cntrl}\\p{Co}]", "").trim();
+                if (!clean.isEmpty()) {
+                    resultSet.add(clean);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Sogou解析失败", e);
+        }
+    }
+    //构造搜狗固定 JSON
+    /**
+     * 核心规则：
+     * 同一个代理IP+端口 → 永远同一个 user_id
+     * 换代理 → 自动换 user_id
+     * 关键词不影响
+     */
+    private String buildSogouJson(String proxyHost, int proxyPort, String keyword) {
+        long timestamp = System.currentTimeMillis();
+
+        // 【唯一绑定：代理IP + 端口】
+        String proxyKey = proxyHost + ":" + proxyPort;
+        int proxyHash = Math.abs(proxyKey.hashCode());
+        String userId = "sogou_proxy_" + proxyHash;
+
+        return "{"
+                + "\"header\":{"
+                +   "\"session\":{\"time\":\"" + timestamp + "\"},"
+                +   "\"user_info\":{"
+                +     "\"guid\":\"\","
+                +     "\"qimei36\":\"\","
+                +     "\"user_id\":\"" + userId + "\","
+                +     "\"qua2\":\"\","
+                +     "\"user_agent_pc\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36\","
+                +     "\"rn_version\":\"1.5.11\""
+                +   "}"
+                + "},"
+                + "\"data\":{"
+                +   "\"req_id\":1890571885,"
+                +   "\"query\":\"" + keyword + "\","
+                +   "\"source\":{\"page_name\":\"sgsearch\"}"
+                + "}"
+                + "}";
     }
 }

@@ -9,19 +9,13 @@ import javax.annotation.PostConstruct;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.*;
-import java.nio.charset.StandardCharsets;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.security.SecureRandom;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
-import java.util.zip.GZIPInputStream;
 
 @Slf4j
 @Component
@@ -53,7 +47,6 @@ public class OkProxyIp extends OkProxyBase {
     }
 
     private OkHttpClient okHttpClient;
-    private static final ThreadLocal<Proxy> PROXY_THREAD_LOCAL = new ThreadLocal<>();
 
     @PostConstruct
     public void init() {
@@ -131,17 +124,6 @@ public class OkProxyIp extends OkProxyBase {
         } finally {
             PROXY_THREAD_LOCAL.remove();
         }
-    }
-
-    private static class DynamicProxySelector extends ProxySelector {
-        @Override
-        public List<Proxy> select(URI uri) {
-            Proxy proxy = PROXY_THREAD_LOCAL.get();
-            return proxy != null ? Arrays.asList(proxy) : Arrays.asList(Proxy.NO_PROXY);
-        }
-
-        @Override
-        public void connectFailed(URI uri, SocketAddress sa, IOException ioe) {}
     }
 
     // ======================

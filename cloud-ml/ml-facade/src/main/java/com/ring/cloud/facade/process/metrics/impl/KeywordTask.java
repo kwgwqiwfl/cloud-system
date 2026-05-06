@@ -16,7 +16,6 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Slf4j
@@ -30,7 +29,6 @@ public class KeywordTask extends AbstractTask<TaskEntity> {
     private String keywordOutPath;
 
     private static final int FLUSH_BATCH_SIZE = 1000;
-    private static final SimpleDateFormat SDF = new SimpleDateFormat("MMddHHmmss");
 
     // 大文件去重用的配置
     private static final int BUFFER_SIZE = 4 * 512 * 1024;
@@ -60,9 +58,8 @@ public class KeywordTask extends AbstractTask<TaskEntity> {
 
         final int MAX_KEYWORD_PER_PROXY = 9;
         int proxyKeywordCount = 0;
-        String timeStamp = SDF.format(new Date());
 
-        File tmpFile = new File(keywordOutPath, site + "_" + timeStamp + ".tmp");
+        File tmpFile = new File(keywordOutPath, site + "_" + task.getTimeStamp() + ".tmp");
         BufferedWriter bw = null;
 
         try {
@@ -122,7 +119,7 @@ public class KeywordTask extends AbstractTask<TaskEntity> {
                     bw.close();
                 }
                 if (tmpFile.exists()) {
-                    distinctAndRenameFile(site, tmpFile, timeStamp);
+                    distinctAndRenameFile(site, tmpFile, task.getTimeStamp());
                 }
             } catch (Exception e) {
                 log.error("[{}] finally 流关闭/文件合并异常", site, e);

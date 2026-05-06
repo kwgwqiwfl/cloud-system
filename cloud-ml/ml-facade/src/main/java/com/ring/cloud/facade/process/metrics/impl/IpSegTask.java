@@ -59,7 +59,7 @@ public class IpSegTask extends AbstractTask<TaskEntity> implements StopCondition
         String csvPath = FileUtil.ipCsvFileName(ipFilePath, ipFileNamePrefix, ipSegment.getSegmentNo());
         String tmpCsvPath = csvPath + ".tmp";
         FileUtil.forceCreateFile(tmpCsvPath);
-        final BufferedWriter bw = initCsvWriter(tmpCsvPath);
+        final BufferedWriter bw = initBufferedWriter(tmpCsvPath);
 
         try {
             // 执行采集逻辑

@@ -110,4 +110,5 @@ public class MixIpDomainServiceImpl extends EntityClassServiceImpl<MixIpDomain> 
             mapper.batchUpsert(tableName, batch);
         });
     }
+
 }

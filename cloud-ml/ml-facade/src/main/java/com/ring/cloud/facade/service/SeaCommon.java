@@ -1,5 +1,6 @@
 package com.ring.cloud.facade.service;
 
+import com.ring.cloud.core.service.ExportService;
 import com.ring.cloud.facade.common.TaskFactory;
 import com.ring.cloud.facade.common.TaskTypeEnum;
 import com.ring.cloud.facade.config.GlobalProgressManager;
@@ -28,6 +29,8 @@ public abstract class SeaCommon {
     protected TaskFactory factory;
     @Autowired
     protected GlobalProgressManager progressManager;
+    @Autowired
+    protected ExportService exportService;
 
     /**
      * 通用文件导入：小写 + 去重 + 自定义线程数 + 监控进度 + 线程执行完才结束

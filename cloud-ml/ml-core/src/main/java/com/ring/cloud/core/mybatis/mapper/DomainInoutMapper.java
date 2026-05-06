@@ -1,9 +1,11 @@
 package com.ring.cloud.core.mybatis.mapper;
 
-import com.ring.cloud.core.entity.ip.DomainCount;
 import com.ring.cloud.core.pojo.DomainInout;
 import com.ring.welkin.common.persistence.mybatis.mapper.MyIdableMapper;
-import org.apache.ibatis.annotations.*;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 import java.util.Map;
@@ -60,41 +62,4 @@ public interface DomainInoutMapper extends MyIdableMapper<DomainInout> {
     })
     int batchUpsert(@Param("list") List<DomainInout> list);
 
-    @Select({
-            "<script>",
-            "SELECT ",
-            "  input_domain     AS inputDomain, ",
-            "  output_domain    AS outputDomain, ",
-            "  COUNT(*)         AS count ",
-            "FROM domain_inout ",
-
-            "<if test=\"hashList != null and !hashList.isEmpty()\">",
-            "WHERE input_hash IN ",
-            "<foreach collection='hashList' open='(' separator=',' close=')' item='item'>",
-            "#{item}",
-            "</foreach>",
-            "</if>",
-
-            "GROUP BY input_hash, output_hash, input_domain, output_domain ",
-            "ORDER BY input_domain, count DESC",
-            "</script>"
-    })
-    @Options(fetchSize = Integer.MIN_VALUE)
-    List<DomainCount> exportStatStream(
-            @Param("hashList") List<String> hashList
-    );
-
-    @Select({
-            "<script>",
-            "SELECT ",
-            "  input_domain     AS inputDomain, ",
-            "  output_domain    AS outputDomain, ",
-            "  COUNT(*)         AS count ",
-            "FROM domain_inout ",
-            "GROUP BY input_hash, output_hash, input_domain, output_domain ",
-            "ORDER BY input_domain, count DESC",
-            "</script>"
-    })
-    @Options(fetchSize = Integer.MIN_VALUE)
-    List<DomainCount> exportAllStatStream();
 }

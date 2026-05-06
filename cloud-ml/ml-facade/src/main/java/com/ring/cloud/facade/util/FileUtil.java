@@ -30,22 +30,25 @@ public class FileUtil {
 	public static void forceCreateFile(String filePath) throws IOException {
 		File file = new File(filePath);
 
-		// 1. 先创建父目录（跨平台）
-		File parentDir = file.getParentFile();
-		if (!parentDir.exists()) {
-			if (!parentDir.mkdirs()) {
-				throw new IOException("创建目录失败：" + parentDir.getAbsolutePath());
-			}
-		}
+		// ====================== 完全注释掉目录创建 ======================
+		// 提前建好目录，不需要这一段！
+	/*
+    File parentDir = file.getParentFile();
+    if (!parentDir.exists()) {
+        if (!parentDir.mkdirs()) {
+            throw new IOException("创建目录失败：" + parentDir.getAbsolutePath());
+        }
+    }
+	*/
 
-		// 2. 如果文件已存在，先删除（解决文件被锁定/占用）
+		// 2. 如果文件已存在，先删除
 		if (file.exists()) {
 			if (!file.delete()) {
 				throw new IOException("旧文件无法删除，可能被占用：" + filePath);
 			}
 		}
 
-		// 3. 新建空白文件
+		// 3. 只创建文件，不碰目录
 		if (!file.createNewFile()) {
 			throw new IOException("文件创建失败：" + filePath);
 		}
@@ -66,7 +69,17 @@ public class FileUtil {
 		// 再执行改名
 		Files.move(tmpFile.toPath(), csvFile.toPath());
 	}
-
+	/**
+	 * 异常时删除临时文件
+	 */
+	public static void deleteTmpFile(String tmpPath) {
+		try {
+			File tmpFile = new File(tmpPath);
+			if (tmpFile.exists()) {
+				tmpFile.delete();
+			}
+		} catch (Exception ignored) {}
+	}
 
 	public static void write(String content) {
 		File file = null;

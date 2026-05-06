@@ -125,7 +125,7 @@ public abstract class AbstractTask<T> implements ITask<T> {
     /**
      * 初始化CSV写入流
      */
-    protected BufferedWriter initCsvWriter(String tmpCsvPath) throws IOException {
+    protected BufferedWriter initBufferedWriter(String tmpCsvPath) throws IOException {
         return new BufferedWriter(
                 new OutputStreamWriter(
                         new FileOutputStream(tmpCsvPath),

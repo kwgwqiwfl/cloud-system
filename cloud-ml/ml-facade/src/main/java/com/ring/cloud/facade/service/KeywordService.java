@@ -1,5 +1,6 @@
 package com.ring.cloud.facade.service;
 
+import com.ring.cloud.core.util.DateUtil;
 import com.ring.cloud.facade.common.TaskTypeEnum;
 import com.ring.cloud.facade.config.GlobalTaskManager;
 import com.ring.cloud.facade.entity.ip.TaskEntity;
@@ -14,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -64,12 +66,13 @@ public class KeywordService extends SeaCommon {
         try {
             int threadCount = siteList.size();
             progressManager.initTask(taskKey, threadCount, totalCount);
-
+            String timeStamp = DateUtil.fileSuffixSDF.format(new Date());
             for (String site : siteList) {
                 TaskEntity task = new TaskEntity();
                 task.setTaskType(TaskTypeEnum.KEYWORD.name());
                 task.setHandleKeyList(dataList);
                 task.setSite(site);
+                task.setTimeStamp(timeStamp);
 
                 handlerExecutor.execHandler(factory, progressManager, task);
             }
@@ -100,13 +103,13 @@ public class KeywordService extends SeaCommon {
             int totalCount = dataList.size();
             int threadCount = siteList.size();
             progressManager.initTask(taskKey, threadCount, totalCount);
-
+            String timeStamp = DateUtil.fileSuffixSDF.format(new Date());
             for (String site : siteList) {
                 TaskEntity task = new TaskEntity();
                 task.setTaskType(TaskTypeEnum.KEYWORD.name());
                 task.setHandleKeyList(dataList);
                 task.setSite(site);
-
+                task.setTimeStamp(timeStamp);
                 handlerExecutor.execHandler(factory, progressManager, task);
             }
 

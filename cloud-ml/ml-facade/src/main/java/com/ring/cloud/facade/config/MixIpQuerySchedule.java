@@ -31,15 +31,15 @@ public class MixIpQuerySchedule {
         long start = System.currentTimeMillis();
         try {
             log.info("mix ip开始");
-            WsUtil.push(WsMessageType.MIX_TASK, "mix ip开始");
+            WsUtil.push(WsMessageType.SCHEDULE_TASK, "mix ip开始");
             String costs = mixIpQueryService.mixIpStatistics();
             long success = successCount.incrementAndGet();
             log.info("mix ip成功 → 三步耗时：{} ms  成功次数：{}", costs, success);
-            WsUtil.push(WsMessageType.MIX_TASK, "mix ip成功。耗时："+costs+"  次数："+success);
+            WsUtil.push(WsMessageType.SCHEDULE_TASK, "mix ip成功。耗时："+costs+"  次数："+success);
         } catch (Throwable e) {
             long fail = failCount.incrementAndGet();
             log.error("mix ip失败 → 耗时：{} ms   失败次数：{} 信息：{}", (System.currentTimeMillis() - start), fail, e.getMessage());
-            WsUtil.push(WsMessageType.MIX_TASK, "mix ip失败!! 信息："+e.getMessage()+"  失败次数："+fail);
+            WsUtil.push(WsMessageType.SCHEDULE_TASK, "mix ip失败!! 信息："+e.getMessage()+"  失败次数："+fail);
         }
     }
 }

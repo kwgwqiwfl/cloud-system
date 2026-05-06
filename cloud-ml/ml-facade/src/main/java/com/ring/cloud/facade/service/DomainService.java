@@ -1,6 +1,5 @@
 package com.ring.cloud.facade.service;
 
-import com.ring.cloud.core.service.DomainInoutService;
 import com.ring.cloud.facade.common.TaskTypeEnum;
 import com.ring.cloud.facade.config.GlobalProgressManager;
 import com.ring.cloud.facade.config.GlobalTaskManager;
@@ -11,20 +10,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @Component
 public class DomainService extends SeaCommon {
 
-    @Autowired
-    private DomainInoutService domainInoutService;
     @Autowired
     private GlobalProgressManager progressManager;
 
@@ -44,14 +35,14 @@ public class DomainService extends SeaCommon {
      * 导出域名数据 按域名分文件
      */
     public String exportDomainData(List<String> inputDomainList) {
-        domainInoutService.exportDomainData(inputDomainList, exportDomainDir);
+        exportService.exportDomainData(inputDomainList, exportDomainDir);
         return exportDomainDir;
     }
     /**
      * 导出域名数据
      */
     public String exportAllDomainData() {
-        domainInoutService.exportAllDomainData(exportAllDomainFilename);
+        exportService.exportAllDomainData(exportAllDomainFilename);
         return exportAllDomainFilename;
     }
 

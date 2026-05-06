@@ -1,9 +1,11 @@
 package com.ring.cloud.facade.entity.ip;
 
+import com.ring.cloud.core.util.DateUtil;
 import com.ring.cloud.facade.common.TaskTypeEnum;
 import com.ring.welkin.common.utils.Snowflake;
 import lombok.Data;
 
+import java.util.Date;
 import java.util.List;
 
 //线程任务对象
@@ -27,6 +29,10 @@ public class TaskEntity {
 
     // 关键词任务专用字段
     private String site;
+    private String timeStamp;
+
+    // loop ip专用
+    private List<Integer> fileNoList;
 
     // 原有构造不动
     public TaskEntity() {}

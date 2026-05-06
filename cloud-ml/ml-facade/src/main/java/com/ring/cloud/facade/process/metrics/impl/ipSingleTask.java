@@ -54,7 +54,7 @@ public class ipSingleTask extends AbstractTask<TaskEntity> implements StopCondit
         FileUtil.forceCreateFile(tmpCsvPath);
         BufferedWriter bw = null;
         try{
-            bw = initCsvWriter(tmpCsvPath);
+            bw = initBufferedWriter(tmpCsvPath);
             IpBreakpoint breakpoint = new IpBreakpoint();
             retryExecute(uniqueKey, null, breakpoint, handleIp, bw, 15);
 //            crawlSingleIpWithRetry(handleIp, bw, null, breakpoint, uniqueKey);

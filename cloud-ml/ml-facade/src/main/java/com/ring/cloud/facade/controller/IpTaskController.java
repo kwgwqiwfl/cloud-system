@@ -23,6 +23,13 @@ public class IpTaskController {
     @Autowired
     IpService ipService;
 
+    @GetMapping("/loopIp/{start}/{end}")
+    @ApiOperation(value = "自动根据拆分的ip文件开启并行读取文件抓取")
+    public MResponse<?> loopIp(@PathVariable("start") Integer start, @PathVariable("end") Integer end) {
+        ipService.loopIp(start, end);
+        return MResponse.ok("启动成功");
+    }
+
     @PostMapping("/startSingleIpList")
     @ApiOperation(value = "启动list中所有ip单个任务")
     public MResponse<?> startSingleIpList(@RequestBody @NotNull List<String> ipList) {

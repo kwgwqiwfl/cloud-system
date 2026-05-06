@@ -15,6 +15,7 @@ import com.ring.cloud.facade.util.IpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,6 +76,13 @@ public class MixIpQueryService extends SeaCommon {
 
     public PageResult<MixIpDomain> pageSpecifyIpDomain(CommonPageQuery query) {
         return mixIpDomainService.pageSpecifyList(query);
+    }
+    @Value("${ml.client.newip.file.path:/}")
+    private String exportMixPath;
+
+    public String exportMix() {
+        exportService.exportMix(exportMixPath);
+        return exportMixPath;
     }
 
     @Autowired(required = false)

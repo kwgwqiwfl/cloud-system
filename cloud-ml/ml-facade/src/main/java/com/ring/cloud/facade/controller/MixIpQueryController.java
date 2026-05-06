@@ -110,4 +110,15 @@ public class MixIpQueryController {
         return MResponse.ok("手动触发成功");
     }
 
+    @GetMapping("/export")
+    @ApiOperation(value = "导出所有最新查询数据")
+    public MResponse<?> exportAllDomain() {
+        try {
+            return MResponse.ok("最新查询导出成功，文件路径："+mixIpQueryService.exportMix());
+        } catch (Throwable e) {
+            log.error("全量域名导出失败", e);
+            return MResponse.error(400, "导出失败：" + e.getMessage());
+        }
+    }
+
 }

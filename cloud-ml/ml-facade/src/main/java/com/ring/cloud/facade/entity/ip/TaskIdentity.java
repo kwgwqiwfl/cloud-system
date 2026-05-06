@@ -12,11 +12,11 @@ public class TaskIdentity {
     private boolean largeIpTask;
     private boolean smallIpTask;
     private boolean domainBatchTask;
-    private boolean keywordBatchTask;  // 【只加这一行】
+    private boolean keywordBatchTask;
+    private boolean ipLoopBatchTask;
 
     // ===== 统一判断：是否需要【全部线程跑完才释放锁】=====
     public boolean isNeedFinishAllRelease() {
-        // 【只加 keywordBatchTask】其他完全不动
-        return largeIpTask || domainBatchTask || keywordBatchTask;
+        return largeIpTask || domainBatchTask || keywordBatchTask || ipLoopBatchTask;
     }
 }

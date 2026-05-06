@@ -93,17 +93,17 @@ public class SpecifyIpSchedule {
         List<String> ipList = getIpList();
         try {
             log.info("specify ip 定时任务开始，待查询IP数量：{}", ipList.size());
-            WsUtil.push(WsMessageType.SPECIFY_TASK, "specify ip 开始，待查询IP数量："+ipList.size());
+            WsUtil.push(WsMessageType.SCHEDULE_TASK, "specify ip 开始，待查询IP数量："+ipList.size());
             // 传入IP列表执行
             String costs = mixIpQueryService.specifyIpQuery(ipList);
             long success = successCount.incrementAndGet();
             log.info("specify ip 定时任务成功 → 耗时：{} ms  成功次数：{}", costs, success);
-            WsUtil.push(WsMessageType.SPECIFY_TASK, "specify ip成功。耗时："+costs+"  次数："+success);
+            WsUtil.push(WsMessageType.SCHEDULE_TASK, "specify ip成功。耗时："+costs+"  次数："+success);
         } catch (Throwable e) {
             long fail = failCount.incrementAndGet();
             log.error("specify ip 定时任务失败 → 耗时：{} ms  失败次数：{} 信息：{}",
                     (System.currentTimeMillis() - start), fail, e.getMessage());
-            WsUtil.push(WsMessageType.SPECIFY_TASK, "specify ip失败!! 信息："+e.getMessage()+"  失败次数："+fail);
+            WsUtil.push(WsMessageType.SCHEDULE_TASK, "specify ip失败!! 信息："+e.getMessage()+"  失败次数："+fail);
         }finally {
             running.set(false);
         }

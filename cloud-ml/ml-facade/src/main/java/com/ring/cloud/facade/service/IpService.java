@@ -10,6 +10,8 @@ import com.ring.cloud.facade.entity.ip.GlobalProgress;
 import com.ring.cloud.facade.entity.ip.IpImport;
 import com.ring.cloud.facade.entity.ip.IpSegment;
 import com.ring.cloud.facade.entity.ip.TaskEntity;
+import com.ring.cloud.facade.socket.WsMessageType;
+import com.ring.cloud.facade.socket.WsUtil;
 import com.ring.cloud.facade.util.IpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,65 @@ public class IpService extends SeaCommon {
     private GlobalProgressManager progressManager;
     @Autowired
     private IpDomainService ipDomainService;
+
+    //启动自动循环文件读取发送线程
+    public void loopIp(int start, int end) {
+        String taskKey = "ip_loop_task";
+
+        // 单实例任务防重（固定锁）
+        if (GlobalTaskManager.isSegmentRunning(taskKey)) {
+            throw new IllegalArgumentException(TaskTypeEnum.IP_LOOP.name() + "任务正在运行，禁止重复启动");
+        }
+        if (!GlobalTaskManager.occupySegment(taskKey)) {
+            throw new IllegalArgumentException(TaskTypeEnum.IP_LOOP.name() + "任务加锁失败");
+        }
+
+        try {
+            int totalFiles = end - start + 1;
+            int realThreadCount = Math.min(totalFiles, 10); // 真实线程数
+
+            progressManager.initTask(taskKey, realThreadCount, totalFiles);
+
+            // ====================== 【连续分片：从小到大分配】 ======================
+            for (int threadId = 0; threadId < realThreadCount; threadId++) {
+                List<Integer> fileList = new ArrayList<>();
+
+                // 连续分片算法：从小到大按段分，进度更直观
+                int perThread = totalFiles / realThreadCount;
+                int remain = totalFiles % realThreadCount;
+
+                int currentStart;
+                int currentEnd;
+
+                if (threadId < remain) {
+                    // 前 remain 个线程多分 1 个
+                    currentStart = start + threadId * (perThread + 1);
+                    currentEnd = currentStart + perThread;
+                } else {
+                    currentStart = start + threadId * perThread + remain;
+                    currentEnd = currentStart + perThread - 1;
+                }
+
+                // 把当前线程负责的连续文件加入列表
+                for (int f = currentStart; f <= currentEnd; f++) {
+                    fileList.add(f);
+                }
+
+                TaskEntity task = new TaskEntity();
+                task.setTaskType(TaskTypeEnum.IP_LOOP.name());
+                task.setFileNoList(fileList);
+
+                handlerExecutor.execHandler(factory, progressManager, task);
+            }
+
+            log.info("✅ IP任务启动完成 | 线程数：" + realThreadCount + " | 文件：" + start + "~" + end);
+
+        } catch (Exception e) {
+            WsUtil.push(WsMessageType.LOOP_TASK, "🔴 IP任务失败：" + e.getMessage());
+            GlobalTaskManager.releaseSegment(taskKey);
+            throw new RuntimeException("IP任务启动失败：" + e.getMessage(), e);
+        }
+    }
 
     //启动指定ip任务
     public void startSingleIpList(List<String> ipList) {

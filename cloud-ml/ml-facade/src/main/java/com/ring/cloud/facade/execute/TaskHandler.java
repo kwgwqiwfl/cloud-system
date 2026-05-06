@@ -39,9 +39,10 @@ public class TaskHandler implements IHandler {
         boolean isLargeIp = TaskTypeEnum.IP_DOMAIN_LARGE.name().equals(taskType);
         boolean isSmallIp = TaskTypeEnum.IP_SINGLE.name().equals(taskType);
         boolean isDomainBatch = TaskTypeEnum.DOMAIN.name().equals(taskType);
-
-        // ====================== 【只加这一行】KEYWORD 批量任务和 DOMAIN 保持一致 ======================
         boolean isKeywordBatch = TaskTypeEnum.KEYWORD.name().equals(taskType);
+
+        // ====================== 【新增】IP 批量循环任务 ======================
+        boolean isIpLoopBatch = TaskTypeEnum.IP_LOOP.name().equals(taskType);
 
         String uniqueKey;
         String lockKey = null;
@@ -60,9 +61,13 @@ public class TaskHandler implements IHandler {
             lockKey = "domain_import_task";
             uniqueKey = taskType + ":thread_" + Thread.currentThread().getId();
         }
-        // ====================== 【只加这一块】KEYWORD 批量任务配置 ======================
         else if (isKeywordBatch) {
             lockKey = "key_import_task";
+            uniqueKey = taskType + ":thread_" + Thread.currentThread().getId();
+        }
+        // ====================== 【新增】IP LOOP 批量任务配置 ======================
+        else if (isIpLoopBatch) {
+            lockKey = "ip_loop_task"; // 固定和你 loopIp 方法一致
             uniqueKey = taskType + ":thread_" + Thread.currentThread().getId();
         }
         else {
@@ -78,9 +83,10 @@ public class TaskHandler implements IHandler {
         identity.setLargeIpTask(isLargeIp);
         identity.setSmallIpTask(isSmallIp);
         identity.setDomainBatchTask(isDomainBatch);
-
-        // ====================== 【只加这一行】标记 KEYWORD 批量任务 ======================
         identity.setKeywordBatchTask(isKeywordBatch);
+
+        // ====================== 【新增】标记 IP 批量任务 ======================
+        identity.setIpLoopBatchTask(isIpLoopBatch);
 
         return identity;
     }
@@ -106,28 +112,27 @@ public class TaskHandler implements IHandler {
             log.info("任务结束 唯一标识={} 状态：{} 耗时：{}ms", uniqueKey, status, cost);
             WsUtil.push(WsMessageType.TASK, uniqueKey + "任务完成。耗时：" + cost + "ms");
 
-            // ====================== 批量任务：统一计数 + 最后释放锁 ======================
             if (identity.isNeedFinishAllRelease()) {
-                // 每个线程 成功/失败 都只计数1次（标准用法）
                 progressManager.onSegmentFinish(lockKey, 1);
 
                 GlobalProgress progress = progressManager.getProgress(lockKey);
                 if (progress != null) {
-                    // 推送前端进度
                     String msg = "任务进度：" + progress.getFinishedSegments().get() + "/" + progress.getTotalSegments().get();
 
-                    // 判断是域名还是关键词任务（不影响逻辑）
                     if(identity.isDomainBatchTask()){
                         WsUtil.push(WsMessageType.DOMAIN_TASK, msg);
                     }
-                    // ====================== 【只加这一段】KEYWORD 进度推送 ======================
                     else if(identity.isKeywordBatchTask()){
                         String site = taskEntity.getSite();
                         String keywordMsg = "✅ " + site + " 子任务完成 | 总进度：" + progress.getFinishedSegments().get() + "/" + progress.getTotalSegments().get();
                         WsUtil.push(WsMessageType.KEYWORD_TASK, keywordMsg);
                     }
+                    // ====================== 【新增】IP 批量任务进度推送 ======================
+                    else if(identity.isIpLoopBatchTask()){
+                        String ipMsg = "✅ IP 子任务完成 | 总进度：" + progress.getFinishedSegments().get() + "/" + progress.getTotalSegments().get();
+                        WsUtil.push(WsMessageType.LOOP_TASK, ipMsg);
+                    }
 
-                    // 只有全部完成 + 第一个抢到标记的线程 才释放锁
                     if (progress.getFinishedSegments().get() == progress.getTotalSegments().get()) {
                         if (progress.getReleased().compareAndSet(false, true)) {
                             log.info("==========================================================");
@@ -138,7 +143,6 @@ public class TaskHandler implements IHandler {
                     }
                 }
             }
-            // ====================== 普通单线程任务：立即释放 ======================
             else {
                 if (lockKey != null) {
                     GlobalTaskManager.releaseSegment(lockKey);

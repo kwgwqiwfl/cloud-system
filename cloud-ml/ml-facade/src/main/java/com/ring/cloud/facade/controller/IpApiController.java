@@ -20,11 +20,11 @@ public class IpApiController {
     @Autowired
     IpApiService ipApiService;
 
-    @GetMapping("/queryDomainByIp/{ip}/{startPage}/{endPage}")
+    @GetMapping("/queryDomainByIp/{ip}/{endAddTime}")
     @ApiOperation(value = "根据ip查询域名")
-    public MResponse<?> queryDomainByIp(@PathVariable("ip") String ip, @PathVariable("startPage") Integer startPage, @PathVariable("endPage") Integer endPage) {
+    public MResponse<?> queryDomainByIp(@PathVariable("ip") String ip, @PathVariable("endAddTime") String endAddTime) {
         try {
-            String fileName = ipApiService.queryDomainByIp(ip, startPage, endPage);
+            String fileName = ipApiService.queryDomainByIp(ip, endAddTime);
             return MResponse.ok("查询成功生成文件："+fileName);
         } catch (Throwable e) {
             log.error("ip反查域名失败" + e.getMessage());

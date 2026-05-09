@@ -102,9 +102,11 @@ public class KeywordTask extends AbstractTask<TaskEntity> {
                 }
 
                 long cost = System.currentTimeMillis() - start;
-                log.info(site + "第{}个：{} 完成，耗时：{}ms", siteKeywordIndex, keyword, cost);
                 siteKeywordIndex++;
-                WsUtil.push(WsMessageType.KEYWORD_TASK, "📌 " + site + " | 第" + siteKeywordIndex + "个关键词：" + keyword + " | 结果数量：" + dropKeywordSet.size());
+                if (siteKeywordIndex % 20 == 0) {
+                    log.info(site + "第{}个：{} 完成，耗时：{}ms", siteKeywordIndex, keyword, cost);
+                    WsUtil.push(WsMessageType.KEYWORD_TASK, "📌 " + site + " | 第" + siteKeywordIndex + "个关键词：" + keyword + " | 结果数量：" + dropKeywordSet.size());
+                }
             }
 
             if (!dataBuffer.isEmpty()) {

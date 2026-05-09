@@ -84,7 +84,7 @@ public class IpLoopTask extends AbstractTask<TaskEntity> implements StopConditio
             List<String> ipList = readIpFileByNo(fileNo);
 
             // 处理单个文件
-            long totalCount = processFileIpList(ipList, breakpoint, bw, currentProxy, uniqueKey);
+            long totalCount = processFileIpList(fileNo, ipList, breakpoint, bw, currentProxy, uniqueKey);
 
             // 日志 & 推送
             log.info("文件编号：{} -- 处理IP数：{} -- 采集成功数：{}", fileNo, ipList.size(), totalCount);
@@ -95,11 +95,11 @@ public class IpLoopTask extends AbstractTask<TaskEntity> implements StopConditio
     }
 
     // 处理单文件列表循环
-    private long processFileIpList(List<String> ipList,
+    private long processFileIpList(int fileNo, List<String> ipList,
                                    IpBreakpoint breakpoint, BufferedWriter bw, ProxyIp currentProxy, String uniqueKey
     ) {
         long segmentTotalCount = 0;
-
+        int count = 0;
         for (String currentIp : ipList) {
             // 任务停止
             if (isTaskStopped(uniqueKey)) {
@@ -114,6 +114,23 @@ public class IpLoopTask extends AbstractTask<TaskEntity> implements StopConditio
             breakpoint.reset();
             retryExecute(uniqueKey, currentProxy, breakpoint, currentIp, bw, 15);
             segmentTotalCount += breakpoint.getCurrentCount();
+
+            count++;
+            if (count % 100 == 0) {
+                log.info("编号[{}]批量处理进度：已成功处理 {} 个IP，当前累计总条数：{}",
+                        fileNo, count, segmentTotalCount);
+            }
+            // ====================== 每 5 个 IP 休眠 50~100ms ======================
+            if (count % 10 == 0) {
+                try {
+                    // 随机 50 ~ 100 毫秒
+                    long sleepTime = 50 + (long) (Math.random() * 51);
+                    Thread.sleep(sleepTime);
+                } catch (InterruptedException e) {
+                    log.warn("IP处理休眠被中断，任务编号: {}", fileNo);
+                    Thread.currentThread().interrupt();
+                }
+            }
         }
 
         return segmentTotalCount;

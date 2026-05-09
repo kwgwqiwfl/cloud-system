@@ -33,6 +33,7 @@ public class IpApiClient {
         Map<String, Object> params = new HashMap<>();
         params.put("ip", ip);
         params.put("page", page);
+        params.put("sort", "addtime_desc");
         IpApiResponse apiResponse = get(ipDoaminUrl, "fed28348588dcbf730eb26a03bfc71ae", params, IpApiResponse.class);
         if (apiResponse != null && Boolean.TRUE.equals(apiResponse.getStatus())) {
             return apiResponse.getData().getResults();

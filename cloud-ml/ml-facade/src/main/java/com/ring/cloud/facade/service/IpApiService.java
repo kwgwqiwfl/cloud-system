@@ -33,10 +33,11 @@ public class IpApiService extends SeaCommon {
 
     /**
      * 分页查询IP反查域名
+     *
      */
-    public String queryDomainByIp(String ip, int startPage, int endPage) {
+    public String queryDomainByIp(String ip, String endAddTime) {
         String timestamp = DateUtil.fileSuffixSDF.format(new Date());
-        String baseFileName = ip + "-" + timestamp;
+        String baseFileName = ip + "-" + endAddTime + "-" + timestamp;
 
         String finalFilePath = apiFilePath + File.separator + baseFileName + ".csv";
         String tmpFilePath = apiFilePath + File.separator + baseFileName + ".tmp";
@@ -44,54 +45,96 @@ public class IpApiService extends SeaCommon {
         List<DomainResult> cacheList = new ArrayList<>(BATCH_WRITE_SIZE);
         BufferedWriter writer = null;
 
-        log.info("开始处理IP={}，页码从{}到{}，临时文件：{}", ip, startPage, endPage, tmpFilePath);
+        log.info("开始处理IP={}，addtime从当前时间向前到{}，临时文件：{}", ip, endAddTime, tmpFilePath);
 
         try {
             writer = new BufferedWriter(
                     new OutputStreamWriter(new FileOutputStream(tmpFilePath), StandardCharsets.UTF_8)
             );
 
-            // 写入表头
             writer.write("ip,domain,adtime,uptime");
             writer.newLine();
 
-            // 分页查询
-            for (int currentPage = startPage; currentPage <= endPage; currentPage++) {
+            // 分页查询 —— 【绝对安全，不会死循环】
+            for (int currentPage = 1; currentPage < 30000; currentPage++) {
                 List<DomainResult> pageResult = null;
+                boolean querySuccess = false;
 
-                // 查询重试机制
+                // 重试
                 for (int retry = 0; retry <= MAX_RETRY; retry++) {
                     try {
                         log.debug("查询IP={} 第{}页", ip, currentPage);
                         pageResult = ipApiClient.queryDomainByIp(ip, currentPage);
+                        querySuccess = true;
                         break;
                     } catch (Exception e) {
                         if (retry == MAX_RETRY) {
-                            log.error("IP={} 第{}页重试失败，终止任务", ip, currentPage, e);
-                            throw e;
+                            log.error("IP={} 第{}页达到最大重试次数，停止查询", ip, currentPage, e);
+                            break;
                         }
                         log.warn("IP={} 第{}页查询失败，{}ms后重试", ip, currentPage, RETRY_DELAY_MS);
-                        Thread.sleep(RETRY_DELAY_MS);
+                        try {
+                            Thread.sleep(RETRY_DELAY_MS);
+                        } catch (InterruptedException ie) {
+                            Thread.currentThread().interrupt();
+                        }
                     }
                 }
 
-                // ====================== 修复开始 ======================
-                // 先把当前页数据加入缓存
-                if (pageResult != null && !pageResult.isEmpty()) {
-                    cacheList.addAll(pageResult);
-                }
-
-                // 不足100条直接终止
-                if (pageResult == null || pageResult.size() < PAGE_LIMIT) {
-                    log.info("IP={} 第{}页数据不足{}条，终止查询", ip, currentPage, PAGE_LIMIT);
+                if (!querySuccess) {
+                    log.error("IP={} 第{}页查询失败，终止", ip, currentPage);
                     break;
                 }
-                // ====================== 修复结束 ======================
 
-                // 满1000条批量写入
-                if (cacheList.size() >= BATCH_WRITE_SIZE) {
-                    writeBatch(writer, ip, cacheList);
-                    cacheList.clear();
+                if (pageResult == null || pageResult.isEmpty()) {
+                    log.warn("IP={} 第{}页返回数据未空，终止查询", ip, currentPage);
+                    break;
+                }
+
+                // ==============================================
+                // 逐条判断时间（正确顺序，不丢数据）
+                // ==============================================
+                boolean needStop = false;
+                for (DomainResult res : pageResult) {
+                    String addtime = res.getAddtime();
+
+                    // 空值 → 终止
+                    if (addtime == null || addtime.trim().isEmpty()) {
+                        log.error("IP={} 存在addtime为空的数据，终止任务", ip);
+                        needStop = true;
+                        break;
+                    }
+
+                    String pureAddTime = addtime.replace("-", "");
+
+                    // 时间小于截止 → 终止
+                    if (pureAddTime.compareTo(endAddTime) < 0) {
+                        log.info("IP={} addtime={} 小于截止时间{}，正常结束", ip, addtime, endAddTime);
+                        needStop = true;
+                        break;
+                    }
+
+                    // 合格数据加入缓存
+                    cacheList.add(res);
+
+                    // 批量写入
+                    if (cacheList.size() >= BATCH_WRITE_SIZE) {
+                        writeBatch(writer, ip, cacheList);
+                        cacheList.clear();
+                    }
+                }
+
+                if (needStop) {
+                    break;
+                }
+
+                if (pageResult.size() < PAGE_LIMIT) {
+                    log.info("IP={} 第{}页数据不足{}条，已全部拉取完成", ip, currentPage, PAGE_LIMIT);
+                    break;
+                }
+                // ====================== 每10页打印一次 ======================
+                if (currentPage % 10 == 0) {
+                    log.info("IP={} 已成功查询到第 {} 页", ip, currentPage);
                 }
             }
 
@@ -100,37 +143,24 @@ public class IpApiService extends SeaCommon {
                 writeBatch(writer, ip, cacheList);
             }
 
-            // 刷入磁盘
             writer.flush();
+            writer.close();
 
-            // 关闭流再改名
-            if (writer != null) {
-                writer.close();
-                writer = null;
-            }
-
-            // 临时文件改名
             FileUtil.renameTmpToFile(tmpFilePath, finalFilePath);
-            log.info("处理完成，文件已生成：{}", finalFilePath);
+            log.info("查询完成，文件已生成：{}", finalFilePath);
 
         } catch (Exception e) {
-            log.error("IP={} 处理异常", ip, e);
+            log.error("IP={} 查询异常", ip, e);
             FileUtil.deleteTmpFile(tmpFilePath);
             throw new IllegalArgumentException(e.getMessage());
         } finally {
-            // 安全关闭流
             if (writer != null) {
-                try {
-                    writer.close();
-                } catch (IOException ignored) {}
+                try { writer.close(); } catch (IOException ignored) {}
             }
         }
         return finalFilePath;
     }
 
-    /**
-     * 批量写入行（逗号分隔）
-     */
     private void writeBatch(BufferedWriter writer, String ip, List<DomainResult> list) throws IOException {
         if (list == null || list.isEmpty()) return;
 

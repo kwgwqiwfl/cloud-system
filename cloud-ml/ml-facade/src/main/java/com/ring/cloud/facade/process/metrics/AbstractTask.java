@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -30,6 +31,8 @@ public abstract class AbstractTask<T> implements ITask<T> {
     protected String ipFilePath;//文件路径
     @Value("${ml.client.ip.file.name.prefix:test}")
     protected String ipFileNamePrefix;//文件名前缀
+
+    protected static final int FLUSH_BATCH_SIZE = 1000;
 
     /**
      * 通用IP 域名等采集重试 + 代理切换 + 任务停止
@@ -184,6 +187,14 @@ public abstract class AbstractTask<T> implements ITask<T> {
         if (tmpFile.exists()) {
             tmpFile.renameTo(finalFile);
         }
+    }
+
+    protected void batchWrite(BufferedWriter writer, List<String> buffer) throws Exception {
+        for (String word : buffer) {
+            writer.write(word);
+            writer.newLine();
+        }
+        buffer.clear();
     }
 
 

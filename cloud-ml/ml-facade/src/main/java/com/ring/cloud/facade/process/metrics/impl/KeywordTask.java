@@ -28,8 +28,6 @@ public class KeywordTask extends AbstractTask<TaskEntity> {
     @Value("${ml.client.keyword.output.path:/}")
     private String keywordOutPath;
 
-    private static final int FLUSH_BATCH_SIZE = 1000;
-
     // 大文件去重用的配置
     private static final int BUFFER_SIZE = 4 * 512 * 1024;
     private static final int CHUNK_LINES = 500000;
@@ -103,7 +101,7 @@ public class KeywordTask extends AbstractTask<TaskEntity> {
 
                 long cost = System.currentTimeMillis() - start;
                 siteKeywordIndex++;
-                if (siteKeywordIndex % 20 == 0) {
+                if (siteKeywordIndex % 50 == 0) {
                     log.info(site + "第{}个：{} 完成，耗时：{}ms", siteKeywordIndex, keyword, cost);
                     WsUtil.push(WsMessageType.KEYWORD_TASK, "📌 " + site + " | 第" + siteKeywordIndex + "个关键词：" + keyword + " | 结果数量：" + dropKeywordSet.size());
                 }
@@ -112,9 +110,10 @@ public class KeywordTask extends AbstractTask<TaskEntity> {
             if (!dataBuffer.isEmpty()) {
                 batchWrite(bw, dataBuffer);
             }
-
+            bw.flush();
         } catch (Exception e) {
             log.error("[{}]文件写入异常", site, e);
+            return false;
         } finally {
             try {
                 if (bw != null) {
@@ -129,14 +128,6 @@ public class KeywordTask extends AbstractTask<TaskEntity> {
         }
 
         return true;
-    }
-
-    private void batchWrite(BufferedWriter writer, List<String> buffer) throws Exception {
-        for (String word : buffer) {
-            writer.write(word);
-            writer.newLine();
-        }
-        buffer.clear();
     }
 
     private Set<String> doCrawlDrop(String keyword, String site, ProxyIp proxy) {

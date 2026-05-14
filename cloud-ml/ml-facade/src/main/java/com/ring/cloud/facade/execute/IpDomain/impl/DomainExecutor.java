@@ -52,4 +52,9 @@ public class DomainExecutor extends IpBaseExecutor {
         if (list == null || list.isEmpty()) return;
         breakpoint.getList().addAll(list);
     }
+
+    //不翻页模式查 域名-子域名
+    public List<String> firstSubs(String domain, ProxyIp proxy) {
+        return firstSubsCrawl(domain, proxy);
+    }
 }

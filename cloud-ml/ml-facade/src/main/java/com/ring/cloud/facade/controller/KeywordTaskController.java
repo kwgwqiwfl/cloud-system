@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-
 @Slf4j
 @RestController
 @RequestMapping("/keyword")
@@ -47,16 +45,4 @@ public class KeywordTaskController {
         }
     }
 
-    // ======================== 导入 ========================
-    @PostMapping("/test")
-    @ApiOperation(value = "测试")
-    public MResponse<?> test(@RequestBody List<String> list) {
-        try {
-            keywordService.test(list);
-            return MResponse.ok("导入成功");
-        } catch (Throwable e) {
-            log.error("域名导入失败", e);
-            return MResponse.error(400, "导入失败：" + e.getMessage());
-        }
-    }
 }

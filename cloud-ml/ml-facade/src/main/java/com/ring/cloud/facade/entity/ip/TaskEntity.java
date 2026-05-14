@@ -30,6 +30,8 @@ public class TaskEntity {
     // 关键词任务专用字段
     private String site;
     private String timeStamp;
+    // 子域名复用关键词加下面的路径
+    private String outPath;
 
     // loop ip专用
     private List<Integer> fileNoList;

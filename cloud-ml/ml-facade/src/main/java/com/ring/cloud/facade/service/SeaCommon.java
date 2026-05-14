@@ -21,6 +21,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.ring.cloud.facade.util.FileUtil.readFileToList;
+
 @Slf4j
 public abstract class SeaCommon {
     @Autowired
@@ -40,56 +42,14 @@ public abstract class SeaCommon {
      * @param maxThreadCount 最大开启线程数
      * @return 导入数量
      */
-    protected int commonImportFile(MultipartFile file, TaskTypeEnum taskType, String taskKey, int maxThreadCount) {
-
-        // ====================== 新增容错：文件不能为空 ======================
-        if (file == null || file.isEmpty()) {
-            throw new RuntimeException("上传文件不能为空");
-        }
-
-        // 1. 读取文件 → 小写 → 去重
-        Set<String> dataSet = new HashSet<>();
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String data = line.trim().toLowerCase();
-                if (!data.isEmpty()) {
-                    dataSet.add(data);
-
-                    // ====================== 新增容错：最大行数 50 万 ======================
-                    if (dataSet.size() > 500000) {
-                        throw new RuntimeException("文件有效行数超出限制，最大允许导入 50 万行");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("导入文件读取失败：" + e.getMessage(), e);
-        }
-
-        List<String> dataList = new ArrayList<>(dataSet);
-        if (dataList.isEmpty()) {
-            throw new RuntimeException("文件中无有效数据");
-        }
+    protected int commonImportFile(MultipartFile file, TaskTypeEnum taskType, WsMessageType wsType, String taskKey, int maxThreadCount) {
+        List<String> dataList = readFileToList(file);
         int totalCount = dataList.size();
-        WsUtil.push(WsMessageType.DOMAIN_TASK, "域名采集启动 总量：" + totalCount);
+        WsUtil.push(wsType, "采集启动 总量：" + totalCount);
 
-        // ====================== 新增容错：线程数安全限制（1~10） ======================
-        if (maxThreadCount < 1) {
-            maxThreadCount = 1;
-        }
-        if (maxThreadCount > 10) {
-            maxThreadCount = 10;
-        }
-
-        // ====================== 全局导入任务防重 ======================
-        if (GlobalTaskManager.isSegmentRunning(taskKey)) {
-            throw new IllegalArgumentException(taskType.name() + "导入任务正在运行，禁止重复启动");
-        }
-        if (!GlobalTaskManager.occupySegment(taskKey)) {
-            throw new IllegalArgumentException(taskType.name() + "导入任务加锁失败");
-        }
-
+        // ====================== 新增容错：线程数安全限制（1~20） ======================
+        maxThreadCount = Math.max(1, Math.min(20, maxThreadCount));
+        checkAndLockTask(taskType, taskKey);
         try {
 
             // ====================== 最终线程数（取 数据量、限制线程数 最小值） ======================
@@ -114,9 +74,22 @@ public abstract class SeaCommon {
             }
             return dataList.size();
         } catch (Exception e) {
-            WsUtil.push(WsMessageType.DOMAIN_TASK, "域名采集导入失败！ 信息：" + e.getMessage());
+            WsUtil.push(wsType, "导入失败！ 信息：" + e.getMessage());
             GlobalTaskManager.releaseSegment(taskKey);
             throw new RuntimeException(taskType.name() + "导入任务失败：" + e.getMessage(), e);
+        }
+    }
+    /**
+     * 通用任务防重复校验
+     */
+    protected void checkAndLockTask(TaskTypeEnum taskType, String taskKey) {
+        // 判断是否正在运行
+        if (GlobalTaskManager.isSegmentRunning(taskKey)) {
+            throw new IllegalArgumentException(taskType.name() + "导入任务正在运行，禁止重复启动");
+        }
+        // 尝试加锁
+        if (!GlobalTaskManager.occupySegment(taskKey)) {
+            throw new IllegalArgumentException(taskType.name() + "导入任务加锁失败");
         }
     }
 

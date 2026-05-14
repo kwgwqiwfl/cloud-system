@@ -23,7 +23,6 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 public abstract class IpBaseExecutor {
@@ -155,7 +154,7 @@ public abstract class IpBaseExecutor {
         return resultList;
     }
 
-    // ========================= 【查询子域名】 =========================
+    // ========================= 【翻页查询子域名】 =========================
     protected List<String> executeSubdomainCrawl(String domain, ProxyIp proxy, IpBreakpoint breakpoint,
                                              int maxPage) {
         List<String> resultList = new ArrayList<>();
@@ -168,7 +167,7 @@ public abstract class IpBaseExecutor {
                 log.debug("页面无效，未找到 子域名查询 标识，url:{}", url);
                 throw new IllegalArgumentException("html 数据异常");
             }
-            Set<String> domains = IpUtil.parseSubDomains(xmlContent);
+            List<String> domains = IpUtil.parseSubDomains(xmlContent);
             if(domains.size()==0)
                 resultList.add(domain);
             else resultList.addAll(domains);
@@ -200,6 +199,17 @@ public abstract class IpBaseExecutor {
             }
         }
         return resultList;
+    }
+
+    // ========================= 【查询第一页子域名】 =========================
+    protected List<String> firstSubsCrawl(String domain, ProxyIp proxy) {
+        String url = IpUtil.buildSubdomainUrlFirst(domain, subdomainUrl);
+        String xmlContent = okProxyIp.doProxyRequest(proxy.getIp(), proxy.getPort(), url, "");
+        if (xmlContent == null || !xmlContent.contains("子域名查询")) {
+            log.debug("页面无效，未找到 子域名查询 标识，url:{}", url);
+            throw new IllegalArgumentException("html 数据异常");
+        }
+        return IpUtil.parseSubDomains(xmlContent);
     }
 
     // ========================= 父类核心公共方法（全部保留） =========================

@@ -11,12 +11,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static com.ring.cloud.facade.util.FileUtil.readFileToList;
 
 @Slf4j
 @Component
@@ -27,42 +25,10 @@ public class KeywordService extends SeaCommon {
 
     public int importKeywordFile(MultipartFile file) {
         String taskKey = "key_import_task";
-        if (file == null || file.isEmpty()) {
-            throw new RuntimeException("上传文件不能为空");
-        }
-
-        List<String> dataList = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String data = line.trim().toLowerCase();
-                if (!data.isEmpty()) {
-                    dataList.add(data);
-
-                    // 行数限制
-                    if (dataList.size() > 1000000) {
-                        throw new RuntimeException("文件有效行数超出限制，最大允许导入 100 万行");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("导入文件读取失败：" + e.getMessage(), e);
-        }
-
-        if (dataList.isEmpty()) {
-            throw new RuntimeException("文件中无有效数据");
-        }
+        List<String> dataList = readFileToList(file);
         int totalCount = dataList.size();
         WsUtil.push(WsMessageType.KEYWORD_TASK, "🟢 关键词任务开始 | 总个数：" + totalCount);
-        // 全局任务防重
-        if (GlobalTaskManager.isSegmentRunning(taskKey)) {
-            throw new IllegalArgumentException(TaskTypeEnum.KEYWORD.name() + "导入任务正在运行，禁止重复启动");
-        }
-        if (!GlobalTaskManager.occupySegment(taskKey)) {
-            throw new IllegalArgumentException(TaskTypeEnum.KEYWORD.name() + "导入任务加锁失败");
-        }
-
+        checkAndLockTask(TaskTypeEnum.KEYWORD, taskKey);
         try {
             int threadCount = siteList.size();
             progressManager.initTask(taskKey, threadCount, totalCount);
@@ -77,7 +43,7 @@ public class KeywordService extends SeaCommon {
                 handlerExecutor.execHandler(factory, progressManager, task);
             }
 
-            return dataList.size();
+            return totalCount;
         } catch (Exception e) {
             WsUtil.push(WsMessageType.KEYWORD_TASK, "🔴 关键词采集导入失败 | 原因：" + e.getMessage());
             GlobalTaskManager.releaseSegment(taskKey);
@@ -88,34 +54,4 @@ public class KeywordService extends SeaCommon {
     public void startKeywordTask() {
     }
 
-    //测试接口
-    public void test(List<String> dataList) {
-        String taskKey = "key_import_task";
-        // 全局任务防重
-        if (GlobalTaskManager.isSegmentRunning(taskKey)) {
-            throw new IllegalArgumentException(TaskTypeEnum.KEYWORD.name() + "导入任务正在运行，禁止重复启动");
-        }
-        if (!GlobalTaskManager.occupySegment(taskKey)) {
-            throw new IllegalArgumentException(TaskTypeEnum.KEYWORD.name() + "导入任务加锁失败");
-        }
-
-        try {
-            int totalCount = dataList.size();
-            int threadCount = siteList.size();
-            progressManager.initTask(taskKey, threadCount, totalCount);
-            String timeStamp = DateUtil.fileSuffixSDF.format(new Date());
-            for (String site : siteList) {
-                TaskEntity task = new TaskEntity();
-                task.setTaskType(TaskTypeEnum.KEYWORD.name());
-                task.setHandleKeyList(dataList);
-                task.setSite(site);
-                task.setTimeStamp(timeStamp);
-                handlerExecutor.execHandler(factory, progressManager, task);
-            }
-
-        } catch (Exception e) {
-            GlobalTaskManager.releaseSegment(taskKey);
-            throw new RuntimeException(TaskTypeEnum.KEYWORD.name() + "导入任务失败：" + e.getMessage(), e);
-        }
-    }
 }

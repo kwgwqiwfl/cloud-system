@@ -1,7 +1,15 @@
 package com.ring.cloud.facade.util;
 
+import com.ring.cloud.facade.entity.ip.TaskEntity;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class FileUtil {
 	public static final int BATCH_SIZE = 1024 * 32;    // 32KB 一批
@@ -157,6 +165,73 @@ public class FileUtil {
 		}
 		if (!tmpFile.renameTo(formalFile)) {
 			throw new IOException("tmp文件转正失败：" + tmpFilePath + " → " + formalFilePath);
+		}
+	}
+
+	/**
+	 * 通用导入文件读取工具：读取文本文件 → 去重 → 小写 → 校验行数 → 返回 List
+	 */
+	public static List<String> readFileToList(MultipartFile file) {
+		// 文件不能为空
+		if (file == null || file.isEmpty()) {
+			throw new RuntimeException("上传文件不能为空");
+		}
+
+		Set<String> dataSet = new HashSet<>();
+		try (BufferedReader reader = new BufferedReader(
+				new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
+
+			String line;
+			while ((line = reader.readLine()) != null) {
+				String data = line.trim().toLowerCase();
+				if (!data.isEmpty()) {
+					dataSet.add(data);
+
+					// 最大 200 万行限制
+					if (dataSet.size() > 2000000) {
+						throw new RuntimeException("文件有效行数超出限制，最大允许导入 200 万行");
+					}
+				}
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("导入文件读取失败：" + e.getMessage(), e);
+		}
+
+		List<String> dataList = new ArrayList<>(dataSet);
+		if (dataList.isEmpty()) {
+			throw new RuntimeException("文件中无有效数据");
+		}
+
+		return dataList;
+	}
+
+	public static void mergeAllSubdomainFiles(TaskEntity task) {
+		String timeStamp = task.getTimeStamp();
+		String outPath = task.getOutPath();
+		File outputDir = new File(outPath);
+
+		File finalCsv = new File(outputDir, "子域名_" + timeStamp + ".csv");
+		String suffix = "_" + timeStamp + ".tmp";
+
+		File[] tmpFiles = outputDir.listFiles((dir, name) -> name.endsWith(suffix));
+		if (tmpFiles == null || tmpFiles.length == 0) {
+			return;
+		}
+
+		byte[] buffer = new byte[8192]; // 8K 标准快读缓冲区
+
+		try (OutputStream out = Files.newOutputStream(finalCsv.toPath())) {
+			for (File tmp : tmpFiles) {
+				try (InputStream in = Files.newInputStream(tmp.toPath())) {
+					int len;
+					while ((len = in.read(buffer)) != -1) {
+						out.write(buffer, 0, len);
+					}
+				}
+				Files.deleteIfExists(tmp.toPath());
+			}
+		} catch (Exception e) {
+			// 不抛出异常
 		}
 	}
 }

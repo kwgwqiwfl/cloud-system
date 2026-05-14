@@ -104,13 +104,13 @@ public class IpUtil {
      * 2. 判断是否有数据（不存在 .none 或 “暂无相关数据”）禁止查询该域名
      * 3. 提取所有子域名并去重
      */
-    public static Set<String> parseSubDomains(String html) {
-        Set<String> domainSet = new HashSet<>();
+    public static List<String> parseSubDomains(String html) {
+        List<String> subDomainList = new ArrayList<>();
         if (!html.contains("子域名查询")) {
             throw new IllegalArgumentException("subdomain html异常");
         }
         if (html.contains("暂无相关数据") || html.contains("禁止查询该域名") ) {
-            return domainSet;
+            return subDomainList;
         }
         Document doc = Jsoup.parse(html);
         Elements linkElements = doc.select(".J_subdomain tbody tr td a");
@@ -118,11 +118,11 @@ public class IpUtil {
             for (Element a : linkElements) {
                 String domain = a.text().trim();
                 if (!domain.isEmpty() && domain.contains(".")) {
-                    domainSet.add(domain);
+                    subDomainList.add(domain);
                 }
             }
         }
-        return domainSet;
+        return subDomainList;
     }
 
     // 获取本段起始IP

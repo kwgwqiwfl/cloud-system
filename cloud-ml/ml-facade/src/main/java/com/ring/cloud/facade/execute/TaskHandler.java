@@ -9,6 +9,7 @@ import com.ring.cloud.facade.entity.ip.TaskEntity;
 import com.ring.cloud.facade.entity.ip.TaskIdentity;
 import com.ring.cloud.facade.socket.WsMessageType;
 import com.ring.cloud.facade.socket.WsUtil;
+import com.ring.cloud.facade.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -40,9 +41,8 @@ public class TaskHandler implements IHandler {
         boolean isSmallIp = TaskTypeEnum.IP_SINGLE.name().equals(taskType);
         boolean isDomainBatch = TaskTypeEnum.DOMAIN.name().equals(taskType);
         boolean isKeywordBatch = TaskTypeEnum.KEYWORD.name().equals(taskType);
-
-        // ====================== 【新增】IP 批量循环任务 ======================
         boolean isIpLoopBatch = TaskTypeEnum.IP_LOOP.name().equals(taskType);
+        boolean isDomainSubBatch = TaskTypeEnum.DOMAIN_SUB.name().equals(taskType);
 
         String uniqueKey;
         String lockKey = null;
@@ -65,9 +65,12 @@ public class TaskHandler implements IHandler {
             lockKey = "key_import_task";
             uniqueKey = taskType + ":thread_" + Thread.currentThread().getId();
         }
-        // ====================== 【新增】IP LOOP 批量任务配置 ======================
         else if (isIpLoopBatch) {
-            lockKey = "ip_loop_task"; // 固定和你 loopIp 方法一致
+            lockKey = "ip_loop_task";
+            uniqueKey = taskType + ":thread_" + Thread.currentThread().getId();
+        }
+        else if (isDomainSubBatch) {
+            lockKey = "domain_sub_import_task";
             uniqueKey = taskType + ":thread_" + Thread.currentThread().getId();
         }
         else {
@@ -84,9 +87,8 @@ public class TaskHandler implements IHandler {
         identity.setSmallIpTask(isSmallIp);
         identity.setDomainBatchTask(isDomainBatch);
         identity.setKeywordBatchTask(isKeywordBatch);
-
-        // ====================== 【新增】标记 IP 批量任务 ======================
         identity.setIpLoopBatchTask(isIpLoopBatch);
+        identity.setDomainSubBatchTask(isDomainSubBatch);
 
         return identity;
     }
@@ -127,19 +129,40 @@ public class TaskHandler implements IHandler {
                         String keywordMsg = "✅ " + site + " 子任务完成 | 总进度：" + progress.getFinishedSegments().get() + "/" + progress.getTotalSegments().get();
                         WsUtil.push(WsMessageType.KEYWORD_TASK, keywordMsg);
                     }
-                    // ====================== 【新增】IP 批量任务进度推送 ======================
                     else if(identity.isIpLoopBatchTask()){
                         String ipMsg = "✅ IP 子任务完成 | 总进度：" + progress.getFinishedSegments().get() + "/" + progress.getTotalSegments().get();
                         WsUtil.push(WsMessageType.LOOP_TASK, ipMsg);
                     }
-
+                    else if(identity.isDomainSubBatchTask()){
+                        String ipMsg = "✅ 子域名 子任务完成 | 总进度：" + progress.getFinishedSegments().get() + "/" + progress.getTotalSegments().get();
+                        WsUtil.push(WsMessageType.DOMAIN_SUB_TASK, ipMsg);
+                    }
                     if (progress.getFinishedSegments().get() == progress.getTotalSegments().get()) {
                         if (progress.getReleased().compareAndSet(false, true)) {
                             log.info("==========================================================");
-                            log.info("✅ 批量任务全部执行完成，释放全局锁：{}", lockKey);
+                            log.info("✅ 批量任务全部执行完成，准备处理：{}", lockKey);
                             log.info("==========================================================");
-                            GlobalTaskManager.releaseSegment(lockKey);
+
+                            try {
+                                // ====================== 子域名：先合并文件 ======================
+                                if (identity.isDomainSubBatchTask()) {
+                                    try {
+                                        log.info("[子域名全量完成] 开始执行文件合并...");
+                                        FileUtil.mergeAllSubdomainFiles(taskEntity);
+
+                                        WsUtil.push(WsMessageType.DOMAIN_SUB_TASK, "✅ 子域名任务全部完成！文件合并处理完毕");
+                                    } catch (Exception e) {
+                                        log.error("[子域名合并文件] 执行失败，但任务仍会结束", e);
+                                        WsUtil.push(WsMessageType.DOMAIN_SUB_TASK, "❌ 子域名文件合并失败，但任务已全部结束");
+                                    }
+                                }
+                            } finally {
+                                // ====================== 无论如何 最终一定释放锁 ======================
+                                log.info("✅ 最终释放全局锁：{}", lockKey);
+                                GlobalTaskManager.releaseSegment(lockKey);
+                            }
                         }
+
                     }
                 }
             }

@@ -21,8 +21,21 @@ public class DomainInoutController {
     private DomainService domainService;
 
     // ======================== 导入 ========================
+    @PostMapping("/importSub")
+    @ApiOperation(value = "导入域名数据（支持csv、txt），查询子域名")
+    public MResponse<?> importSub(@RequestParam("file") MultipartFile file) {
+        try {
+            int size = domainService.subDomainsByDomain(file);
+            return MResponse.ok("导入成功，有效域名个数："+size);
+        } catch (Throwable e) {
+            log.error("域名导入失败"+e.getMessage());
+            return MResponse.error(400, "导入失败：" + e.getMessage());
+        }
+    }
+
+    // ======================== 导入 ========================
     @PostMapping("/import")
-    @ApiOperation(value = "导入域名数据（支持csv、txt）")
+    @ApiOperation(value = "导入域名数据（支持csv、txt），查询输出域名")
     public MResponse<?> importDomain(@RequestParam("file") MultipartFile file) {
         try {
             int size = domainService.importDomainFile(file);

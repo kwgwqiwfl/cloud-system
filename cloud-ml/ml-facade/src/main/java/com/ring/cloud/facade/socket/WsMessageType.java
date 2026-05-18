@@ -5,6 +5,7 @@ public enum WsMessageType {
     ERROR,  // 错误
     TASK,   // 任务进度
     NORMAL_TASK,   // 正常任务进度
+    PANG_TASK,   // 循环任务进度
     LOOP_TASK,   // 循环任务进度
     SCHEDULE_TASK,   // 定时任务进度
 //    ML_DOMAIN_AI_TASK,   // 最新ai域名任务进度

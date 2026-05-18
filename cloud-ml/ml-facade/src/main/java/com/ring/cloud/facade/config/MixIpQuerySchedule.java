@@ -34,11 +34,11 @@ public class MixIpQuerySchedule {
             WsUtil.push(WsMessageType.SCHEDULE_TASK, "mix ip开始");
             String costs = mixIpQueryService.mixIpStatistics();
             long success = successCount.incrementAndGet();
-            log.info("mix ip成功 → 三步耗时：{} ms  成功次数：{}", costs, success);
+            log.info("mix ip成功 → 耗时：{} ms  成功次数：{}", costs, success);
             WsUtil.push(WsMessageType.SCHEDULE_TASK, "mix ip成功。耗时："+costs+"  次数："+success);
         } catch (Throwable e) {
             long fail = failCount.incrementAndGet();
-            log.error("mix ip失败 → 耗时：{} ms   失败次数：{} 信息：{}", (System.currentTimeMillis() - start), fail, e.getMessage());
+            log.error("mix ip失败 → 失败次数：{} 信息：{}", fail, e.getMessage());
             WsUtil.push(WsMessageType.SCHEDULE_TASK, "mix ip失败!! 信息："+e.getMessage()+"  失败次数："+fail);
         }
     }

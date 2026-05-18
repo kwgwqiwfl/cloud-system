@@ -43,6 +43,7 @@ public class TaskHandler implements IHandler {
         boolean isKeywordBatch = TaskTypeEnum.KEYWORD.name().equals(taskType);
         boolean isIpLoopBatch = TaskTypeEnum.IP_LOOP.name().equals(taskType);
         boolean isDomainSubBatch = TaskTypeEnum.DOMAIN_SUB.name().equals(taskType);
+        boolean isIpPangBatch = TaskTypeEnum.IP_PANG.name().equals(taskType);
 
         String uniqueKey;
         String lockKey = null;
@@ -69,6 +70,10 @@ public class TaskHandler implements IHandler {
             lockKey = "ip_loop_task";
             uniqueKey = taskType + ":thread_" + Thread.currentThread().getId();
         }
+        else if (isIpPangBatch) {
+            lockKey = "ip_pang_task";
+            uniqueKey = taskType + ":thread_" + Thread.currentThread().getId();
+        }
         else if (isDomainSubBatch) {
             lockKey = "domain_sub_import_task";
             uniqueKey = taskType + ":thread_" + Thread.currentThread().getId();
@@ -89,6 +94,7 @@ public class TaskHandler implements IHandler {
         identity.setKeywordBatchTask(isKeywordBatch);
         identity.setIpLoopBatchTask(isIpLoopBatch);
         identity.setDomainSubBatchTask(isDomainSubBatch);
+        identity.setIpPangBatchTask(isIpPangBatch);
 
         return identity;
     }
@@ -132,6 +138,10 @@ public class TaskHandler implements IHandler {
                     else if(identity.isIpLoopBatchTask()){
                         String ipMsg = "✅ IP 子任务完成 | 总进度：" + progress.getFinishedSegments().get() + "/" + progress.getTotalSegments().get();
                         WsUtil.push(WsMessageType.LOOP_TASK, ipMsg);
+                    }
+                    else if(identity.isIpPangBatchTask()){
+                        String ipMsg = "✅ pang 子任务完成 | 总进度：" + progress.getFinishedSegments().get() + "/" + progress.getTotalSegments().get();
+                        WsUtil.push(WsMessageType.PANG_TASK, ipMsg);
                     }
                     else if(identity.isDomainSubBatchTask()){
                         String ipMsg = "✅ 子域名 子任务完成 | 总进度：" + progress.getFinishedSegments().get() + "/" + progress.getTotalSegments().get();

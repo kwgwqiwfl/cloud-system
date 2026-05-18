@@ -117,19 +117,9 @@ public class IpLoopTask extends AbstractTask<TaskEntity> implements StopConditio
 
             count++;
             if (count % 100 == 0) {
-                log.info("编号[{}]批量处理进度：已成功处理 {} 个IP，当前累计总条数：{}",
-                        fileNo, count, segmentTotalCount);
-            }
-            // ====================== 每 5 个 IP 休眠 50~100ms ======================
-            if (count % 10 == 0) {
-                try {
-                    // 随机 50 ~ 100 毫秒
-                    long sleepTime = 50 + (long) (Math.random() * 51);
-                    Thread.sleep(sleepTime);
-                } catch (InterruptedException e) {
-                    log.warn("IP处理休眠被中断，任务编号: {}", fileNo);
-                    Thread.currentThread().interrupt();
-                }
+                log.info("文件[{}]进度：{}，最近IP=" +
+                                " {}，累计结果={}",
+                        fileNo, count, currentIp, segmentTotalCount);
             }
         }
 

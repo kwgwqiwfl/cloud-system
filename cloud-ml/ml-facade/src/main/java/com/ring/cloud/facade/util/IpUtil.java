@@ -2,6 +2,7 @@ package com.ring.cloud.facade.util;
 
 import com.ring.cloud.facade.config.SpecifyIpSchedule;
 import com.ring.cloud.facade.entity.ip.IpSegment;
+import com.ring.cloud.facade.entity.ip.PangIpData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -79,7 +80,7 @@ public class IpUtil {
         }
         return true;
     }
-
+    //解析pang ip
     public static List<String> parsePangValidIps(String xmlContent) {
         if(!validStrContains(xmlContent, "c-bd", "tfoot"))//校验html字符串
             throw new IllegalArgumentException("pang html为空");
@@ -93,6 +94,23 @@ public class IpUtil {
             if(CollectionUtils.isEmpty(tdList))
                 throw new IllegalArgumentException("pang 列表异常");
             ips.add(tdList.get(0).text());
+        }
+        return ips;
+    }
+    //解析pang ip count
+    public static List<PangIpData> parsePangIpData(String xmlContent) {
+        if(!validStrContains(xmlContent, "c-bd", "tfoot"))//校验html字符串
+            throw new IllegalArgumentException("pang html为空");
+        List<PangIpData> ips = new ArrayList<>();
+        Document doc = Jsoup.parse(xmlContent);
+        Element table = doc.selectFirst("div.c-bd table");
+        assert table != null;
+        Elements trList = table.select("tbody tr.J_link");
+        for (Element tr : trList) {
+            Elements tdList = tr.select("td");
+            if(CollectionUtils.isEmpty(tdList))
+                throw new IllegalArgumentException("pang 列表异常");
+            ips.add(new PangIpData(tdList.get(0).text(), tdList.get(1).text()));
         }
         return ips;
     }

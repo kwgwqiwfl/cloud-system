@@ -1,5 +1,6 @@
 package com.ring.cloud.facade.support;
 
+import com.ring.cloud.facade.entity.ip.PangIpData;
 import com.ring.cloud.facade.entity.ip.PangRequest;
 import com.ring.cloud.facade.entity.proxy.ProxyIp;
 import com.ring.cloud.facade.frame.OkProxyPang;
@@ -44,6 +45,12 @@ public class PangIpSupport {
         String url = IpUtil.buildPangUrl(currentIp, ipPangUrl);
         String xmlContent = okProxyPang.doProxyRequest(proxy.getIp(), proxy.getPort(), url, "");
         return IpUtil.parsePangValidIps(xmlContent);
+    }
+
+    public List<PangIpData> pangIpCountNoRetry(String currentIp, ProxyIp proxy) {
+        String url = IpUtil.buildPangUrl(currentIp, ipPangUrl);
+        String xmlContent = okProxyPang.doProxyRequest(proxy.getIp(), proxy.getPort(), url, "");
+        return IpUtil.parsePangIpData(xmlContent);
     }
 
 }

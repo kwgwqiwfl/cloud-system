@@ -126,4 +126,11 @@ public class IpTaskController {
             return MResponse.error(400, e.getMessage());
         }
     }
+
+    @GetMapping("/pangIp/{start}/{end}")
+    @ApiOperation(value = "查询pang的ip列表")
+    public MResponse<?> pangIp(@PathVariable("start") Integer start, @PathVariable("end") Integer end) {
+        ipService.pangIp(start, end);
+        return MResponse.ok("启动成功");
+    }
 }

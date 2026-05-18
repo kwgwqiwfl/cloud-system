@@ -82,7 +82,7 @@ public class IpSegTask extends AbstractTask<TaskEntity> implements StopCondition
                 log.info("任务[" + uniqueKey + "]已终止，最后处理ip段：" + currentIp);
                 return true;
             }
-            if (ExceedStop(currentIp, endIp)) {
+            if (ipExceedStop(currentIp, endIp)) {
                 break;
             }
             if (IpUtil.isInternalIp(currentIp)) {
@@ -168,10 +168,6 @@ public class IpSegTask extends AbstractTask<TaskEntity> implements StopCondition
     @Override
     protected boolean doExecute(String ip, BufferedWriter bw, ProxyIp currentProxy, IpBreakpoint breakpoint) throws IOException {
         return normalExecutor.execute(ip, bw, currentProxy, breakpoint);
-    }
-
-    public boolean ExceedStop(String currentIp, String endIp) {
-        return IpUtil.isCurrentIpExceedEndIp(currentIp, endIp);
     }
 
     // ========== StopCondition 接口实现 ==========

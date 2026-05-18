@@ -7,6 +7,7 @@ import com.ring.cloud.facade.frame.OkProxyPang;
 import com.ring.cloud.facade.proxy.GlobalProxyHelper;
 import com.ring.cloud.facade.support.PangIpSupport;
 import com.ring.cloud.facade.util.FileUtil;
+import com.ring.cloud.facade.util.IpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -197,5 +198,7 @@ public abstract class AbstractTask<T> implements ITask<T> {
         buffer.clear();
     }
 
-
+    public boolean ipExceedStop(String currentIp, String endIp) {
+        return IpUtil.isCurrentIpExceedEndIp(currentIp, endIp);
+    }
 }

@@ -28,9 +28,9 @@ public class KeywordTask extends AbstractTask<TaskEntity> {
     @Value("${ml.client.keyword.output.path:/}")
     private String keywordOutPath;
 
-    // 大文件去重用的配置
+    // 大文件去重用的配置 改为8万行控制内存峰值
     private static final int BUFFER_SIZE = 4 * 512 * 1024;
-    private static final int CHUNK_LINES = 500000;
+    private static final int CHUNK_LINES = 80000;
 
     @Override
     public TaskTypeEnum taskEnum() {
@@ -57,7 +57,7 @@ public class KeywordTask extends AbstractTask<TaskEntity> {
         final int MAX_KEYWORD_PER_PROXY = 9;
         int proxyKeywordCount = 0;
 
-        File tmpFile = new File(keywordOutPath, site + "_" + task.getTimeStamp() + ".tmp");
+        File tmpFile = new File(keywordOutPath,  task.getTimeStamp() + "_" + site + ".tmp");
         BufferedWriter bw = null;
 
         try {
@@ -97,6 +97,7 @@ public class KeywordTask extends AbstractTask<TaskEntity> {
 
                 if (dataBuffer.size() >= FLUSH_BATCH_SIZE) {
                     batchWrite(bw, dataBuffer);
+                    dataBuffer.clear();
                 }
 
                 long cost = System.currentTimeMillis() - start;
@@ -109,6 +110,7 @@ public class KeywordTask extends AbstractTask<TaskEntity> {
 
             if (!dataBuffer.isEmpty()) {
                 batchWrite(bw, dataBuffer);
+                dataBuffer.clear();
             }
             bw.flush();
         } catch (Exception e) {
@@ -134,9 +136,6 @@ public class KeywordTask extends AbstractTask<TaskEntity> {
         return keywordExecutor.execute(keyword, site, proxy);
     }
 
-    // ======================
-    // 【全新：参考你给的大文件去重，完全重写】
-    // ======================
     private void distinctAndRenameFile(String site, File tmpFile, String timeStamp) throws Exception {
         File finalFile = new File(keywordOutPath, site + "_" + timeStamp + ".txt");
         List<File> chunkFiles = new ArrayList<>();
@@ -151,6 +150,7 @@ public class KeywordTask extends AbstractTask<TaskEntity> {
         for (File f : chunkFiles) {
             if (f.exists()) f.delete();
         }
+        chunkFiles.clear();
 
         // 4. 删除原始临时文件
         if (tmpFile.exists()) {
@@ -177,6 +177,9 @@ public class KeywordTask extends AbstractTask<TaskEntity> {
             if (!lines.isEmpty()) {
                 sortAndSaveChunk(lines, chunks);
             }
+            // 手动释放引用 加速内存回收
+            lines.clear();
+            lines = null;
         }
     }
 
@@ -233,6 +236,8 @@ public class KeywordTask extends AbstractTask<TaskEntity> {
                     br.close();
                 } catch (Exception ignored) {}
             }
+            readers.clear();
+            pq.clear();
         }
     }
 

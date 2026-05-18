@@ -133,9 +133,11 @@ public class OkProxyIp extends OkProxyBase {
         try {
             if (url.contains("chapangzhan.com")) {
                 // 随机 1200~2200 毫秒，更像真人
-                Thread.sleep(1200 + new Random().nextInt(1000));
+                Thread.sleep(1200 + ThreadLocalRandom.current().nextInt(1000));
+            }else if (url.contains("chaziyu.com")) {
+                Thread.sleep(5 + ThreadLocalRandom.current().nextInt(20));
             }else {
-                Thread.sleep(30 + ThreadLocalRandom.current().nextInt(70));
+                Thread.sleep(20 + ThreadLocalRandom.current().nextInt(50));
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

@@ -1,84 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>cloud-ml</artifactId>
-        <groupId>com.ring.cloud</groupId>
-        <version>${cloud.revision}</version>
-    </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>ml-facade</artifactId>
 
-    <properties>
-        <spark.version>3.5.1</spark.version>
-    </properties>
+    <parent>
+        <artifactId>cloud-system</artifactId>
+		<groupId>com.ring.cloud</groupId>
+		<version>${cloud.revision}</version>
+    </parent>
+
+    <artifactId>cloud-gateway</artifactId>
+    <packaging>jar</packaging>
+
+    <name>cloud-gateway</name>
+    <description>cloud-gateway Project</description>
+
     <dependencies>
+        <!-- ======================== 网关 Gateway 核心依赖 ======================== -->
+        <!-- Spring Cloud Gateway 网关核心 -->
         <dependency>
-            <groupId>com.ring.cloud</groupId>
-            <artifactId>ml-core</artifactId>
-            <version>${cloud.revision}</version>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-gateway</artifactId>
         </dependency>
+
+        <!-- Nacos 服务发现（网关必须用它发现后端服务） -->
         <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-all</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-websocket</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-web</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.ring.welkin</groupId>
-            <artifactId>welkin-cloud-spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.ring.welkin</groupId>
-            <artifactId>welkin-webmvc-spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-        </dependency>
-        <!-- redis
-        <dependency>
-            <groupId>org.redisson</groupId>
-            <artifactId>redisson-spring-boot-starter</artifactId>
-            <version>3.21.0</version>
-        </dependency>-->
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-            <version>3.14.9</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jsoup</groupId>
-            <artifactId>jsoup</artifactId>
-            <version>1.15.3</version>
-        </dependency>
-        <dependency>
-            <groupId>net.sourceforge.htmlunit</groupId>
-            <artifactId>htmlunit</artifactId>
-            <version>2.70.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jdom</groupId>
-            <artifactId>jdom2</artifactId>
-            <version>2.0.6</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-core_2.13</artifactId>
-            <version>${spark.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-mllib_2.13</artifactId>
-            <version>${spark.version}</version>
-            <scope>provided</scope>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
         </dependency>
     </dependencies>
 

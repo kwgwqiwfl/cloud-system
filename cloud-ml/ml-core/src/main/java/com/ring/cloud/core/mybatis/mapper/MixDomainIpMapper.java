@@ -14,7 +14,7 @@ public interface MixDomainIpMapper extends MyIdableMapper<MixDomainIp> {
 
     @Select({
             "<script>",
-            "SELECT * FROM mix_domain_ip ",
+            "SELECT * FROM mix_domain_0 ",
             "WHERE domain_crc = #{domainCrc} ",
             "ORDER BY id DESC ",
             "LIMIT #{offset}, #{pageSize}",
@@ -26,10 +26,10 @@ public interface MixDomainIpMapper extends MyIdableMapper<MixDomainIp> {
 
     @Insert({
             "<script>",
-            "INSERT INTO ${tableName} (ip_long, ip, domain, domain_crc, adtime, uptime) ",
+            "INSERT INTO ${tableName} (ip_long, ip, domains, domain_crc, adtime, uptime) ",
             "VALUES ",
             "<foreach collection='list' item='item' separator=','>",
-            "(#{item.ipLong}, #{item.ip}, #{item.domain}, #{item.domainCrc}, #{item.adtime}, #{item.uptime})",
+            "(#{item.ipLong}, #{item.ip}, #{item.domains}, #{item.domainCrc}, #{item.adtime}, #{item.uptime})",
             "</foreach>",
             "ON DUPLICATE KEY UPDATE ",
             "adtime = VALUES(adtime), ",

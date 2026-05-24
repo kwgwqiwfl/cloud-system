@@ -22,7 +22,8 @@
 		<docker.skip.build>true</docker.skip.build>
 	</properties>
 	<modules>
-        <module>cloud-ml</module>
+		<module>cloud-ml</module>
+		<module>cloud-gateway</module>
     </modules>
 
 	<build>
@@ -175,115 +176,6 @@
 						<goals>
 							<goal>clean</goal>
 						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>3.2.0</version> <!-- 稳定版本，无报红 -->
-				<executions>
-					<!-- 1. 复制配置文件到 deploy/config -->
-					<execution>
-						<id>copy-deploy-config</id>
-						<phase>package</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${project.build.directory}/deploy/config</outputDirectory>
-							<resources>
-								<resource>
-									<directory>${project.basedir}/src/main/resources</directory>
-									<filtering>false</filtering>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-
-					<!-- 2. 复制启动脚本到 deploy/bin -->
-					<execution>
-						<id>copy-deploy-scripts</id>
-						<phase>package</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${project.build.directory}/deploy</outputDirectory>
-							<resources>
-								<resource>
-									<directory>${project.basedir}/src/main/scripts</directory> <!-- 脚本目录 -->
-									<filtering>false</filtering>
-									<includes>
-										<include>**/*.sh</include>
-										<include>**/*.bat</include>
-									</includes>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-
-					<!-- 3. 复制原有jar包到 deploy/jar（复用已有产物，不重新生成） -->
-					<execution>
-						<id>copy-self-jar-to-deploy</id>
-						<phase>package</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${project.build.directory}/deploy/jar</outputDirectory>
-							<resources>
-								<resource>
-									<directory>${project.build.directory}</directory> <!-- 原有jar包所在目录 -->
-									<includes>
-										<include>${project.artifactId}-${project.version}.jar</include> <!-- 原有jar包名称 -->
-									</includes>
-									<filtering>false</filtering>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
-			<!-- 4. 复制依赖jar -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<version>3.1.2</version>
-				<executions>
-					<execution>
-						<id>copy-dependencies-to-deploy</id>
-						<phase>package</phase>
-						<goals>
-							<goal>copy-dependencies</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${project.build.directory}/deploy/jar</outputDirectory>
-							<overWriteReleases>false</overWriteReleases>
-							<overWriteSnapshots>false</overWriteSnapshots>
-							<overWriteIfNewer>true</overWriteIfNewer>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<!-- 4. 创建logs目录（两个独立插件，无冲突） -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.8</version>
-				<executions>
-					<execution>
-						<id>create-deploy-logs-dir</id>
-						<phase>package</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<target>
-								<mkdir dir="${project.build.directory}/deploy/logs"/> <!-- 仅创建空目录 -->
-							</target>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>

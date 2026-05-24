@@ -43,10 +43,10 @@ public interface MixIpDomainMapper extends MyIdableMapper<MixIpDomain> {
     // 批量插入（不含主键）
     @Insert({
             "<script>",
-            "INSERT INTO ${tableName} (ip_long, ip, loc, domain, domain_crc, adtime, uptime) ",
+            "INSERT INTO ${tableName} (ip_long, ip, loc, domains, domain_crc, adtime, uptime) ",
             "VALUES ",
             "<foreach collection='list' item='item' separator=','>",
-            "(#{item.ipLong}, #{item.ip}, #{item.loc}, #{item.domain}, #{item.domainCrc}, #{item.adtime}, #{item.uptime})",
+            "(#{item.ipLong}, #{item.ip}, #{item.loc}, #{item.domains}, #{item.domainCrc}, #{item.adtime}, #{item.uptime})",
             "</foreach>",
             "</script>"
     })
@@ -58,10 +58,10 @@ public interface MixIpDomainMapper extends MyIdableMapper<MixIpDomain> {
     // 批量 UPSERT（存在则更新，不存在则插入）
     @Insert({
             "<script>",
-            "INSERT INTO ${tableName} (ip_long, ip, loc, domain, domain_crc, adtime, uptime) ",
+            "INSERT INTO ${tableName} (ip_long, ip, loc, domains, domain_crc, adtime, uptime) ",
             "VALUES ",
             "<foreach collection='list' item='item' separator=','>",
-            "(#{item.ipLong}, #{item.ip}, #{item.loc}, #{item.domain}, #{item.domainCrc}, #{item.adtime}, #{item.uptime})",
+            "(#{item.ipLong}, #{item.ip}, #{item.loc}, #{item.domains}, #{item.domainCrc}, #{item.adtime}, #{item.uptime})",
             "</foreach>",
             "ON DUPLICATE KEY UPDATE ",
             "loc = VALUES(loc), ",
@@ -76,7 +76,7 @@ public interface MixIpDomainMapper extends MyIdableMapper<MixIpDomain> {
 
     //导出mix数据===============================================================================
     // 1. 最新域名
-    @Select("SELECT domain,create_time,update_time,query_count FROM ml_domain")
+    @Select("SELECT domains,create_time,update_time,query_count FROM ml_domain")
     @Options(fetchSize = Integer.MIN_VALUE)
     List<MlDomain> streamMlDomain();
 
@@ -86,22 +86,22 @@ public interface MixIpDomainMapper extends MyIdableMapper<MixIpDomain> {
     List<MlIp> streamMlIp();
 
     // 3. 最新备案
-    @Select("SELECT domain,create_time,update_time,query_count FROM ml_icp")
+    @Select("SELECT domains,create_time,update_time,query_count FROM ml_icp")
     @Options(fetchSize = Integer.MIN_VALUE)
     List<MlIcp> streamMlIcp();
 
     // 4. 最新子域名
-    @Select("SELECT domain,create_time,update_time,query_count FROM ml_subdomain")
+    @Select("SELECT domains,create_time,update_time,query_count FROM ml_subdomain")
     @Options(fetchSize = Integer.MIN_VALUE)
     List<MlSubdomain> streamMlSubdomain();
 
     // 5. 特定ip → 使用 MixIpDomain
-    @Select("SELECT ip,loc,domain,adtime,uptime FROM specify_ip_domain")
+    @Select("SELECT ip,loc,domains,adtime,uptime FROM specify_ip_domain")
     @Options(fetchSize = Integer.MIN_VALUE)
     List<MixIpDomain> streamSpecifyIpDomain();
 
     // 6. 最新ai
-    @Select("SELECT domain,ad_time,up_time,total_count,day_count FROM ml_domain_ai")
+    @Select("SELECT domains,ad_time,up_time,total_count,day_count FROM ml_domain_ai")
     @Options(
             fetchSize = Integer.MIN_VALUE,
             timeout = 0,
@@ -110,7 +110,7 @@ public interface MixIpDomainMapper extends MyIdableMapper<MixIpDomain> {
     List<MlDomainAi> streamMlDomainAiStream();
 
     // 7 单表流式查询 IP ✅ 真·流式修复
-    @Select("SELECT /*+ NO_LOCK */ ip,loc,domain,adtime,uptime FROM ${tableName}")
+    @Select("SELECT /*+ NO_LOCK */ ip,loc,domains,adtime,uptime FROM ${tableName}")
     @Options(
             fetchSize = Integer.MIN_VALUE,
             timeout = 0,
@@ -119,7 +119,7 @@ public interface MixIpDomainMapper extends MyIdableMapper<MixIpDomain> {
     List<MixIpDomain> ipDomainStream(@Param("tableName") String tableName);
 
     // 8 单表流式查询 Domain ✅ 真·流式修复
-    @Select("SELECT /*+ NO_LOCK */ ip,domain,adtime,uptime FROM ${tableName}")
+    @Select("SELECT /*+ NO_LOCK */ ip,domains,adtime,uptime FROM ${tableName}")
     @Options(
             fetchSize = Integer.MIN_VALUE,
             timeout = 0,

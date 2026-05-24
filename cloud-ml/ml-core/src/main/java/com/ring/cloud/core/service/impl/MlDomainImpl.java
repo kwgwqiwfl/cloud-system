@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -36,7 +35,7 @@ public class MlDomainImpl extends EntityClassServiceImpl<MlDomain> implements Ml
 
     @Override
     public void updateInfo(MlDomain domain) {
-        MlDomain exist = mapper.selectByDomain(domain.getDomain());
+        MlDomain exist = mapper.selectByDomain(domain.getDomains());
 
         if (exist == null) {
             mapper.insertSelective(domain);

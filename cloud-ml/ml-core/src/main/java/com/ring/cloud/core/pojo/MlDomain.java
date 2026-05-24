@@ -21,13 +21,13 @@ public class MlDomain extends AbstractMl {
     @ApiModelProperty(value = "域名")
     @Comment("域名")
     @Column(length = 255, nullable = false)
-    private String domain;
+    private String domains;
 
     public MlDomain() {
     }
 
     public MlDomain(String domain) {
-        this.domain = domain;
+        this.domains = domain;
         this.queryCount = 0;
     }
 }

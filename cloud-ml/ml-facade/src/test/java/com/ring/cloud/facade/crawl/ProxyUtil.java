@@ -1,28 +1,14 @@
 package com.ring.cloud.facade.crawl;
 
-import com.alibaba.fastjson.JSON;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.ring.cloud.facade.entity.proxy.ProxyData;
 import com.ring.cloud.facade.entity.proxy.ProxyIp;
 import com.ring.cloud.facade.entity.proxy.ProxyResponse;
-import com.ring.cloud.facade.util.FileUtil;
-import com.ring.cloud.facade.util.WebUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.*;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 

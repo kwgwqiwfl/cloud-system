@@ -12,9 +12,9 @@ import java.util.List;
 public interface MlDomainAiMapper extends MyIdableMapper<MlDomainAi> {
 
     @Insert("<script>"
-            + "INSERT INTO ml_domain_ai (domain, domain_hash, ad_time, up_time, total_count, day_count) VALUES "
+            + "INSERT INTO ml_domain_ai (domains, domain_hash, ad_time, up_time, total_count, day_count) VALUES "
             + "<foreach collection='list' item='item' separator=','>"
-            + "(#{item.domain}, #{item.domainHash}, #{item.adTime}, #{item.upTime}, #{item.totalCount}, #{item.dayCount})"
+            + "(#{item.domains}, #{item.domainHash}, #{item.adTime}, #{item.upTime}, #{item.totalCount}, #{item.dayCount})"
             + "</foreach>"
             + "ON DUPLICATE KEY UPDATE "
             + "total_count = total_count + 1, "

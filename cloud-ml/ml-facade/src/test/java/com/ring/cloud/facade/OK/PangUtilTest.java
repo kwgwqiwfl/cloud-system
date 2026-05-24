@@ -1,4 +1,4 @@
-package com.ring.cloud.facade.test;
+package com.ring.cloud.facade.OK;
 
 import lombok.extern.slf4j.Slf4j;
 

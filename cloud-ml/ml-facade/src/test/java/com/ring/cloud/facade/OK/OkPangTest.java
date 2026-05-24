@@ -1,4 +1,4 @@
-package com.ring.cloud.facade.test;
+package com.ring.cloud.facade.OK;
 
 import com.alibaba.fastjson.JSON;
 import com.ring.cloud.facade.entity.proxy.ProxyIp;

@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -36,7 +35,7 @@ public class MlIcpImpl extends EntityClassServiceImpl<MlIcp> implements MlIcpSer
 
     @Override
     public void updateInfo(MlIcp icp) {
-        MlIcp exist = mapper.selectByDomain(icp.getDomain());
+        MlIcp exist = mapper.selectByDomain(icp.getDomains());
 
         if (exist == null) {
             mapper.insertSelective(icp);

@@ -2,7 +2,6 @@ package com.ring.cloud.core.pojo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.ring.cloud.core.util.DateUtil;
 import com.ring.welkin.common.core.jackson.deserializer.DateJsonDeserializer;
 import com.ring.welkin.common.persistence.mybatis.type.routing.DateTypeRoutingHandler;
 import io.swagger.annotations.ApiModel;
@@ -42,7 +41,7 @@ public class SourceIpDomain extends AbstractStar {
     @Comment("绑定过的域名")
     @Column(length = 255)
     @ColumnType(jdbcType = JdbcType.VARCHAR)
-    private String domain;
+    private String domains;
 
     @ApiModelProperty(value = "创建时间", required = false, accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     @Comment("创建时间")
@@ -67,7 +66,7 @@ public class SourceIpDomain extends AbstractStar {
     public SourceIpDomain(String ip, String loc, String domain, String adtimeStr, String uptimeStr) {
         this.ip = ip;
         this.loc = loc;
-        this.domain = domain;
+        this.domains = domain;
         this.adtimeStr = adtimeStr;
         this.uptimeStr = uptimeStr;
     }

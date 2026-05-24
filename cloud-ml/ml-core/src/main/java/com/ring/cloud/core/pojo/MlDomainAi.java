@@ -29,7 +29,7 @@ public class MlDomainAi extends AbstractStar {
     @ApiModelProperty(value = "域名")
     @Comment("域名")
     @Column(length = 255, nullable = false)
-    private String domain;
+    private String domains;
 
     @ApiModelProperty(value = "域名哈希值")
     @Comment("域名哈希值")
@@ -67,7 +67,7 @@ public class MlDomainAi extends AbstractStar {
      * domain初始化
      */
     public MlDomainAi(String domain) {
-        this.domain = domain;
+        this.domains = domain;
         this.domainHash = HashUtil.sha1(domain);
         this.adTime = new Date();
         this.upTime = new Date();

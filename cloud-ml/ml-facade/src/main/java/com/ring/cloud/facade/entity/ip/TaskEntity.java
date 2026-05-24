@@ -1,11 +1,9 @@
 package com.ring.cloud.facade.entity.ip;
 
-import com.ring.cloud.core.util.DateUtil;
 import com.ring.cloud.facade.common.TaskTypeEnum;
 import com.ring.welkin.common.utils.Snowflake;
 import lombok.Data;
 
-import java.util.Date;
 import java.util.List;
 
 //线程任务对象

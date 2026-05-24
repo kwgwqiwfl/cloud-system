@@ -92,7 +92,7 @@ public class FileCoreUtil {
     public static String buildLine(Object obj) {
         if (obj instanceof MlDomain) {
             MlDomain o = (MlDomain) obj;
-            return o.getDomain() + "," + fmt(o.getCreateTime()) + "," + fmt(o.getUpdateTime()) + "," + o.getQueryCount();
+            return o.getDomains() + "," + fmt(o.getCreateTime()) + "," + fmt(o.getUpdateTime()) + "," + o.getQueryCount();
         }
         if (obj instanceof MlIp) {
             MlIp o = (MlIp) obj;
@@ -100,23 +100,23 @@ public class FileCoreUtil {
         }
         if (obj instanceof MlIcp) {
             MlIcp o = (MlIcp) obj;
-            return o.getDomain() + "," + fmt(o.getCreateTime()) + "," + fmt(o.getUpdateTime()) + "," + o.getQueryCount();
+            return o.getDomains() + "," + fmt(o.getCreateTime()) + "," + fmt(o.getUpdateTime()) + "," + o.getQueryCount();
         }
         if (obj instanceof MlSubdomain) {
             MlSubdomain o = (MlSubdomain) obj;
-            return o.getDomain() + "," + fmt(o.getCreateTime()) + "," + fmt(o.getUpdateTime()) + "," + o.getQueryCount();
+            return o.getDomains() + "," + fmt(o.getCreateTime()) + "," + fmt(o.getUpdateTime()) + "," + o.getQueryCount();
         }
         if (obj instanceof MlDomainAi) {
             MlDomainAi o = (MlDomainAi) obj;
-            return o.getDomain() + "," + fmt(o.getAdTime()) + "," + fmt(o.getUpTime()) + "," + o.getTotalCount() + "," + o.getDayCount();
+            return o.getDomains() + "," + fmt(o.getAdTime()) + "," + fmt(o.getUpTime()) + "," + o.getTotalCount() + "," + o.getDayCount();
         }
         if (obj instanceof MixIpDomain) {
             MixIpDomain o = (MixIpDomain) obj;
-            return o.getIp() + "," + o.getLoc() + "," + o.getDomain() + "," + fmt(o.getAdtime()) + "," + fmt(o.getUptime());
+            return o.getIp() + "," + o.getLoc() + "," + o.getDomains() + "," + fmt(o.getAdtime()) + "," + fmt(o.getUptime());
         }
         if (obj instanceof MixDomainIp) {
             MixDomainIp o = (MixDomainIp) obj;
-            return o.getIp() + "," + o.getDomain() + "," + fmt(o.getAdtime()) + "," + fmt(o.getUptime());
+            return o.getIp() + "," + o.getDomains() + "," + fmt(o.getAdtime()) + "," + fmt(o.getUptime());
         }
         return "";
     }

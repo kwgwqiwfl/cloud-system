@@ -40,51 +40,51 @@ public class ExportService {
         try {
             // 1. 最新域名
             exportSimpleTable(
-                    path + "/最新域名-" + timestamp + ".csv",
-                    "domain,adtime,uptime,queryCount",
-                    "SELECT domain,create_time,update_time,query_count FROM ml_domain"
+                    path + "/" + timestamp + "_最新域名.csv",
+                    "domains,adtime,uptime,queryCount",
+                    "SELECT domains,create_time,update_time,query_count FROM ml_domain"
             );
 
             // 2. 最新IP
             exportSimpleTable(
-                    path + "/最新ip-" + timestamp + ".csv",
+                    path + "/" + timestamp + "_最新ip.csv",
                     "ip,adtime,uptime,queryCount",
                     "SELECT ip,create_time,update_time,query_count FROM ml_ip"
             );
 
             // 3. 最新备案
             exportSimpleTable(
-                    path + "/最新备案-" + timestamp + ".csv",
-                    "domain,adtime,uptime,queryCount",
-                    "SELECT domain,create_time,update_time,query_count FROM ml_icp"
+                    path + "/" + timestamp + "_最新备案.csv",
+                    "domains,adtime,uptime,queryCount",
+                    "SELECT domains,create_time,update_time,query_count FROM ml_icp"
             );
 
             // 4. 最新子域名
             exportSimpleTable(
-                    path + "/最新子域名-" + timestamp + ".csv",
-                    "domain,adtime,uptime,queryCount",
-                    "SELECT domain,create_time,update_time,query_count FROM ml_subdomain"
+                    path + "/" + timestamp + "_最新子域名.csv",
+                    "domains,adtime,uptime,queryCount",
+                    "SELECT domains,create_time,update_time,query_count FROM ml_subdomain"
             );
 
             // 5. 特定IP
             exportSimpleTable(
-                    path + "/特定ip-" + timestamp + ".csv",
-                    "ip,loc,domain,adtime,uptime",
-                    "SELECT ip,loc,domain,adtime,uptime FROM specify_ip_domain"
+                    path + "/" + timestamp + "_特定ip.csv",
+                    "ip,loc,domains,adtime,uptime",
+                    "SELECT ip,loc,domains,adtime,uptime FROM specify_ip_domain"
             );
 
             // 6. 最新域名AI
             exportSimpleTable(
-                    path + "/最新域名ai-" + timestamp + ".csv",
-                    "domain,adtime,uptime,totalCount,dayCount",
-                    "SELECT domain,ad_time,up_time,total_count,day_count FROM ml_domain_ai"
+                    path + "/" + timestamp + "_最新域名ai.csv",
+                    "domains,adtime,uptime,totalCount,dayCount",
+                    "SELECT domains,ad_time,up_time,total_count,day_count FROM ml_domain_ai"
             );
 
             // ===================== 16张 IP 分表 =====================
-            String ipFile = path + "/最新ip查询域名-" + timestamp + ".csv";
+            String ipFile = path + "/" + timestamp + "_最新ip查询域名.csv";
             try (BufferedWriter bw = new BufferedWriter(
                     new OutputStreamWriter(new FileOutputStream(ipFile), StandardCharsets.UTF_8), 1024 * 1024)) {
-                bw.write("ip,loc,domain,adtime,uptime");
+                bw.write("ip,loc,domains,adtime,uptime");
                 bw.newLine();
                 for (int i = 0; i < 16; i++) {
                     streamIpTable(bw, "mix_ip_" + i);
@@ -92,10 +92,10 @@ public class ExportService {
             }
 
             // ===================== 16张 Domain 分表 =====================
-            String domainFile = path + "/最新域名查询ip-" + timestamp + ".csv";
+            String domainFile = path + "/" + timestamp + "_最新域名查询ip.csv";
             try (BufferedWriter bw = new BufferedWriter(
                     new OutputStreamWriter(new FileOutputStream(domainFile), StandardCharsets.UTF_8), 1024 * 1024)) {
-                bw.write("ip,domain,adtime,uptime");
+                bw.write("ip,domains,adtime,uptime");
                 bw.newLine();
                 for (int i = 0; i < 16; i++) {
                     streamDomainTable(bw, "mix_domain_" + i);
@@ -138,7 +138,7 @@ public class ExportService {
     // 导出 IP 分表（流式）
     // =======================================================================
     private void streamIpTable(BufferedWriter bw, String table) throws Exception {
-        String sql = "SELECT ip,loc,domain,adtime,uptime FROM " + table;
+        String sql = "SELECT ip,loc,domains,adtime,uptime FROM " + table;
         Connection conn = DataSourceUtils.getConnection(jdbcTemplate.getDataSource());
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql,
@@ -150,9 +150,9 @@ public class ExportService {
                     String line =
                             escape(rs.getString("ip")) + "," +
                                     escape(rs.getString("loc")) + "," +
-                                    escape(rs.getString("domain")) + "," +
-                                    rs.getTimestamp("adtime") + "," +
-                                    rs.getTimestamp("uptime");
+                                    escape(rs.getString("domains")) + "," +
+                                    rs.getDate("adtime") + "," +
+                                    rs.getDate("uptime");
 
                     bw.write(line);
                     bw.newLine();
@@ -167,7 +167,7 @@ public class ExportService {
     // 导出 Domain 分表（流式）
     // =======================================================================
     private void streamDomainTable(BufferedWriter bw, String table) throws Exception {
-        String sql = "SELECT ip,domain,adtime,uptime FROM " + table;
+        String sql = "SELECT ip,domains,adtime,uptime FROM " + table;
         Connection conn = DataSourceUtils.getConnection(jdbcTemplate.getDataSource());
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql,
@@ -178,9 +178,9 @@ public class ExportService {
                 while (rs.next()) {
                     String line =
                             escape(rs.getString("ip")) + "," +
-                                    escape(rs.getString("domain")) + "," +
-                                    rs.getTimestamp("adtime") + "," +
-                                    rs.getTimestamp("uptime");
+                                    escape(rs.getString("domains")) + "," +
+                                    rs.getDate("adtime") + "," +
+                                    rs.getDate("uptime");
 
                     bw.write(line);
                     bw.newLine();

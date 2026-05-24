@@ -291,7 +291,7 @@ public abstract class IpBaseExecutor {
         StringBuilder batchSb = new StringBuilder();
         for (SourceIpDomain ipDomain : list) {
             appendCsvRow(batchSb,
-                    ipDomain.getDomain(),
+                    ipDomain.getDomains(),
                     ipDomain.getIp(),
                     ipDomain.getLoc(),
                     ipDomain.getAdtimeStr(),

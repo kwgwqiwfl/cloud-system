@@ -71,7 +71,7 @@ public class IpDomainImpl extends EntityClassServiceImpl<SourceIpDomain> impleme
 //                bean.setId(Long.valueOf(cols[0].trim())); // 读文件里的id
                 bean.setIp(cols[1].trim());
                 bean.setLoc(cols[2].trim());
-                bean.setDomain(cols[3].trim());
+                bean.setDomains(cols[3].trim());
                 bean.setAdtime(DateUtil.parseDate(cols[4]));
                 bean.setUptime(DateUtil.parseDate(cols[5]));
 

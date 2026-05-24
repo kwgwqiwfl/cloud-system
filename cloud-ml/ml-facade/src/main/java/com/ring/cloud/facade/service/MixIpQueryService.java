@@ -186,7 +186,7 @@ public class MixIpQueryService extends SeaCommon {
             // Domain任务
             for (MlDomain mlDomain : info.getDomainList()) {
                 domainTasks.add(() -> {
-                    String domain = mlDomain.getDomain();
+                    String domain = mlDomain.getDomains();
                     IpBreakpoint bp = new IpBreakpoint();
                     MixIpRes res = mixIpImpl.mixSingleWithRetry(QueryType.DOMAIN, domain, bp, 10, 5);
                     if (res.getMixDomainIpList() != null) {

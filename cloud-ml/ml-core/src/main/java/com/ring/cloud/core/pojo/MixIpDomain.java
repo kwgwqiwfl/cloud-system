@@ -49,7 +49,7 @@ public class MixIpDomain extends AbstractStar {
     @Comment("绑定过的域名")
     @Column(length = 255)
     @ColumnType(jdbcType = JdbcType.VARCHAR)
-    private String domain;
+    private String domains;
 
     @ApiModelProperty("域名CRC32哈希")
     @Comment("域名CRC32哈希")
@@ -76,8 +76,8 @@ public class MixIpDomain extends AbstractStar {
         this.ipLong = IpCoreUtils.ipToLong(ip);
     }
 
-    public void setDomain(String domain) {
-        this.domain = domain;
+    public void setDomains(String domain) {
+        this.domains = domain;
         this.domainCrc = IpCoreUtils.crc32(domain);
     }
 
@@ -87,7 +87,7 @@ public class MixIpDomain extends AbstractStar {
     public MixIpDomain(String ip, String loc, String domain, String adtime, String uptime) {
         this.setIp(ip);
         this.loc = loc;
-        this.setDomain(domain);
+        this.setDomains(domain);
         this.adtime = DateUtil.parseDate(adtime);
         this.uptime = DateUtil.parseDate(uptime);
     }

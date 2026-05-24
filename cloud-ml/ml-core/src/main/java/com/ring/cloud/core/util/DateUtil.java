@@ -13,7 +13,7 @@ public class DateUtil {
     // 全局静态，线程安全，支持两种格式：yyyy-MM-dd 和 yyyyMMdd
     private static final DateTimeFormatter FMT1 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter FMT2 = DateTimeFormatter.ofPattern("yyyyMMdd");
-    public static final SimpleDateFormat fileSuffixSDF = new SimpleDateFormat("MMddHHmmss");
+    public static final SimpleDateFormat fileSuffixSDF = new SimpleDateFormat("yyyyMMddHHmmss");
 
     public static Date today() {
         return Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());

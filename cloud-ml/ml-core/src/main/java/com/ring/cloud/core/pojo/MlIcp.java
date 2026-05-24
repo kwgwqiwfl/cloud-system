@@ -21,12 +21,12 @@ public class MlIcp extends AbstractMl {
     @ApiModelProperty(value = "备案域名")
     @Comment("备案域名")
     @Column(length = 255, nullable = false)
-    private String domain;
+    private String domains;
 
     public MlIcp() {
     }
     public MlIcp(String domain) {
-        this.domain = domain;
+        this.domains = domain;
         this.queryCount = 0;
     }
 

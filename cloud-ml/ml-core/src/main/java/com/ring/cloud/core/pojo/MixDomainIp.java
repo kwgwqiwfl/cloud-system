@@ -43,7 +43,7 @@ public class MixDomainIp extends AbstractStar {
     @Comment("域名")
     @Column(length = 255, nullable = false)
     @ColumnType(jdbcType = JdbcType.VARCHAR)
-    private String domain;
+    private String domains;
 
     @ApiModelProperty(value = "域名CRC32")
     @Comment("域名CRC32")
@@ -65,8 +65,8 @@ public class MixDomainIp extends AbstractStar {
     @JsonDeserialize(using = DateJsonDeserializer.class)
     private Date uptime;
 
-    public void setDomain(String domain) {
-        this.domain = domain;
+    public void setDomains(String domain) {
+        this.domains = domain;
         this.domainCrc = IpCoreUtils.crc32(domain);
     }
 
@@ -80,7 +80,7 @@ public class MixDomainIp extends AbstractStar {
 
     public MixDomainIp(String ip, String domain, String adtime, String uptime) {
         this.setIpString(ip);
-        this.setDomain(domain);
+        this.setDomains(domain);
         this.adtime = DateUtil.parseDate(adtime);
         this.uptime = DateUtil.parseDate(uptime);
     }

@@ -37,7 +37,7 @@ public class IpApiService extends SeaCommon {
      */
     public String queryDomainByIp(String ip, String endAddTime) {
         String timestamp = DateUtil.fileSuffixSDF.format(new Date());
-        String baseFileName = ip + "-" + endAddTime + "-" + timestamp;
+        String baseFileName = timestamp+"_"+ip + "_" + endAddTime;
 
         String finalFilePath = apiFilePath + File.separator + baseFileName + ".csv";
         String tmpFilePath = apiFilePath + File.separator + baseFileName + ".tmp";
@@ -185,7 +185,7 @@ public class IpApiService extends SeaCommon {
     public String ipdata(String ip) {
         String timestamp = DateUtil.fileSuffixSDF.format(new Date());
         // 文件名格式：ip-loc-时间戳.csv
-        String fileName = ip + "-loc-" + timestamp + ".csv";
+        String fileName = timestamp+"_"+ip + "_loc.csv";
         String filePath = apiFilePath + File.separator + fileName;
 
         BufferedWriter writer = null;

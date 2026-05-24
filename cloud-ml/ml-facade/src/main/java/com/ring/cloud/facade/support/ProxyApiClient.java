@@ -1,6 +1,5 @@
 package com.ring.cloud.facade.support;
 
-import com.ring.cloud.facade.crawl.ProxyUtil;
 import com.ring.cloud.facade.entity.proxy.ProxyIp;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -34,6 +33,7 @@ public class ProxyApiClient {
         if (StringUtils.isEmpty(proxyStr) || !proxyStr.contains(":")) {
             throw new IllegalArgumentException("代理IP格式不正确：" + proxyStr);
         }
+        //解析ip 字符串形式
         return Stream.of(proxyStr.split("\\n"))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
@@ -48,11 +48,4 @@ public class ProxyApiClient {
                 .collect(Collectors.toList());
     }
 
-    private ProxyIp doGetProxyIp() {
-        String ipStr = restTemplate.getForObject(proxyUrl, String.class);
-        if (StringUtils.isEmpty(ipStr) || !ipStr.contains(":")) {
-            throw new IllegalArgumentException("代理IP格式不正确：" + ipStr);
-        }
-        return ProxyUtil.convertIp(ipStr);
-    }
 }

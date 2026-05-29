@@ -8,68 +8,29 @@
 		<version>${cloud.revision}</version>
     </parent>
 
-    <artifactId>cloud-gateway</artifactId>
+    <artifactId>cloud-auth</artifactId>
     <packaging>jar</packaging>
 
-    <name>cloud-gateway</name>
-    <description>cloud-gateway Project</description>
+    <name>cloud-auth</name>
+    <description>cloud-auth Project</description>
 
     <dependencies>
-        <!-- Gateway 核心 -->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-gateway</artifactId>
-        </dependency>
-
-        <!-- Nacos 服务发现 -->
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
-        </dependency>
-
-        <!-- Nacos 配置中心：动态路由核心依赖 -->
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
-        </dependency>
-
-        <!-- Sentinel 网关流控 -->
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-alibaba-sentinel-gateway</artifactId>
-        </dependency>
-
-        <!-- 负载均衡 -->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
-        </dependency>
-
-        <!-- 监控端点 -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-
-        <!-- Swagger 文档聚合 >
-        <dependency>
-            <groupId>com.github.xiaoymin</groupId>
-            <artifactId>swagger2-bootstrap-starter</artifactId>
-            <version>2.2.12</version>
-        </dependency-->
-
+        <!-- 先依赖 common -->
         <dependency>
             <groupId>com.ring.cloud</groupId>
             <artifactId>cloud-common</artifactId>
             <version>${cloud.revision}</version>
         </dependency>
+
+        <!-- 工具类 -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.ring.welkin</groupId>
+            <artifactId>welkin-common-core</artifactId>
         </dependency>
     </dependencies>
 

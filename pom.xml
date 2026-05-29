@@ -23,7 +23,10 @@
 	</properties>
 	<modules>
 		<module>cloud-ml</module>
-		<module>cloud-gateway</module>
+		<!--module>cloud-gateway</module>
+		<module>cloud-common</module>
+		<module>cloud-user</module>
+		<module>cloud-auth</module-->
     </modules>
 
 	<build>

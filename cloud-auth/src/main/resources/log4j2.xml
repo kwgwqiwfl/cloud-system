@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO" monitorInterval="20">
+    <Properties>
+        <Property name="APP_NAME"><![CDATA[${sys:APP_NAME:-baymax}]]></Property>
+        <Property name="LOG_DIR"><![CDATA[${sys:APP_LOGS_DIR:-logs}]]></Property>
+        <Property name="LOG_PATH"><![CDATA[${LOG_DIR}/${APP_NAME}]]></Property>
+        <Property name="LOG_FILE"><![CDATA[${LOG_PATH}/${APP_NAME}.log]]></Property>
+        <Property name="JSON_LOG_FILE"><![CDATA[${LOG_PATH}/${APP_NAME}_json.log]]></Property>
+        <Property name="LOG_LEVEL_PATTERN"><![CDATA[%5p]]></Property>
+        <Property name="LOG_PATTERN">
+            <![CDATA[[%d{MM/dd HH:mm:ss.SSS}{GMT+8}] %X{pid} %5p [%t] - %c{2}(%L): %m%n %throwable{1000}]]></Property>
+    </Properties>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+        <RollingFile name="Rolling_file" immediateFlush="true"
+                     fileName="${LOG_FILE}"
+                     filePattern="${LOG_FILE}.log.%d{yyyy-MM-dd}-%i">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Filters>
+                <ThresholdFilter level="TRACE" onMatch="ACCEPT"
+                                 onMismatch="DENY"/>
+            </Filters>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"
+                                           modulate="true"/>
+                <SizeBasedTriggeringPolicy size="250 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy fileIndex="nomax">
+                <Delete basePath="${LOG_PATH}">
+                    <IfFileName glob="${LOG_FILE}*"/>
+                    <IfLastModified age="30d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+        <RollingFile name="Rolling_file_json"
+                     immediateFlush="true" fileName="${JSON_LOG_FILE}"
+                     filePattern="${LOG_FILE}_json-%d{yyyyMMdd}-%i.log">
+            <JsonLayout compact="true" eventEol="true"
+                        properties="true" stacktraceAsString="true">
+                <KeyValuePair key="nanoTimestamp" value="$${UtcNanos:}"/>
+            </JsonLayout>
+            <Filters>
+                <ThresholdFilter level="INFO" onMatch="NEUTRAL"
+                                 onMismatch="DENY"/>
+                <ThreadContextMapFilter onMatch="ACCEPT"
+                                        onMismatch="DENY">
+                    <KeyValuePair key="tracking" value="on"/>
+                </ThreadContextMapFilter>
+            </Filters>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"
+                                           modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy fileIndex="nomax">
+                <Delete basePath="${LOG_PATH}">
+                    <IfFileName glob="${LOG_FILE}_json*"/>
+                    <IfLastModified age="1d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+        <Routing name="Routing">
+            <Routes pattern="$${ctx:TASKID}">
+                <!-- This route is chosen if ThreadContext has no value for key TASKID. -->
+                <Route ref="Console" key="${ctx:TASKID}"/>
+                <Route>
+                    <RollingFile name="Rolling_file-${ctx:TASKID}"
+                                 immediateFlush="true"
+                                 fileName="${LOG_DIR}/${APP_NAME}/tasks/${ctx:TASKID}.log"
+                                 filePattern="${LOG_DIR}/${APP_NAME}/tasks/${ctx:TASKID}-%d{yyyyMMdd}-%i.log">
+                        <PatternLayout pattern="${LOG_PATTERN}"/>
+                        <Policies>
+                            <TimeBasedTriggeringPolicy interval="1"
+                                                       modulate="true"/>
+                            <SizeBasedTriggeringPolicy
+                                    size="250 MB"/>
+                        </Policies>
+                        <DefaultRolloverStrategy fileIndex="nomax">
+                            <Delete basePath="${LOG_PATH}">
+                                <IfFileName glob="*"/>
+                                <IfLastModified age="30d"/>
+                            </Delete>
+                        </DefaultRolloverStrategy>
+                    </RollingFile>
+                </Route>
+            </Routes>
+            <IdlePurgePolicy timeToLive="15" timeUnit="minutes"/>
+        </Routing>
+    </Appenders>
+    <Loggers>
+        <Logger name="com.merce.woven.executor" level="INFO"
+                additivity="false">
+            <AppenderRef ref="Routing"/>
+            <AppenderRef ref="Rolling_file"/>
+            <AppenderRef ref="Rolling_file_json"/>
+        </Logger>
+
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="Rolling_file"/>
+            <AppenderRef ref="Rolling_file_json"/>
+        </Root>
+
+        <Logger name="java.sql" level="DEBUG"/>
+        <Logger name="com.merce" level="DEBUG"/>
+        <Logger name="com.info.baymax" level="DEBUG"/>
+        <Logger name="org.springframework" level="INFO"/>
+        <Logger name="com.merce.woven.common.mybatis.cache"
+                level="ERROR"/>
+
+        <!-- hibernate日志输出 -->
+        <Logger name="org.hibernate" level="DEBUG"/>
+        <Logger name="org.hibernate.type.descriptor.sql.BasicBinder"
+                level="DEBUG"/>
+        <Logger name="org.hibernate.type.descriptor.sql.BasicExtractor"
+                level="DEBUG"/>
+        <Logger name="org.hibernate.SQL" level="DEBUG"/>
+        <Logger name="org.hibernate.engine.QueryParameters"
+                level="DEBUG"/>
+        <Logger name="org.hibernate.engine.query.HQLQueryPlan"
+                level="DEBUG"/>
+
+        <Logger name="reactor" level="ERROR"/>
+        <Logger name="io.undertow" level="ERROR"/>
+        <Logger name="io.netty" level="ERROR"/>
+        <Logger name="net.openhft" level="ERROR"/>
+        <Logger name="net.sf" level="ERROR"/>
+        <Logger name="org.hibernate" level="ERROR"/>
+        <Logger name="com.zaxxer" level="ERROR"/>
+        <Logger name="com.alibaba" level="ERROR"/>
+        <Logger name="org.apache" level="ERROR"/>
+        <Logger name="org.reflections" level="ERROR"/>
+        <Logger name="io.swagger" level="ERROR"/>
+        <Logger name="org.quartz" level="ERROR"/>
+        <Logger name="com.netflix" level="ERROR"/>
+        <Logger name="org.mybatis" level="ERROR"/>
+        <Logger name="org.apache.ibatis" level="ERROR"/>
+        <Logger name="tk.mybatis" level="ERROR"/>
+        <Logger name="java.nio" level="ERROR"/>
+        <Logger name="sun.nio" level="ERROR"/>
+        <Logger name="org.xnio" level="ERROR"/>
+        <Logger name="io.lettuce" level="ERROR"/>
+        <logger name="com.zaxxer.hikari" level="ERROR"/>
+        <logger name="io.searchbox" level="ERROR"/>
+    </Loggers>
+</Configuration>

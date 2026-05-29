@@ -60,6 +60,9 @@ public class ProxyPoolManager {
         long now = System.currentTimeMillis();
         while (!queue.isEmpty()) {
             ProxyIp head = queue.peek();
+            if (head == null) {
+                break;
+            }
             if (head.getCreateTime() + MAX_PROXY_AGE < now) {
                 queue.poll();
             } else {

@@ -159,7 +159,7 @@ public abstract class AbstractTask<T> implements ITask<T> {
     /**
      * 关闭流并重命名文件 文件路径
      */
-    protected void closeFileAndRenameByPath(BufferedWriter bw, String tmpPath, String csvPath, boolean isBatchComplete) throws IOException {
+    protected void closeFileAndRenameByPath(BufferedWriter bw, String tmpPath, String path, boolean isBatchComplete) throws IOException {
         try {
             if (bw != null) {
                 bw.flush();
@@ -170,7 +170,7 @@ public abstract class AbstractTask<T> implements ITask<T> {
         }
 
         if (isBatchComplete) {
-            FileUtil.renameTmpToFile(tmpPath, csvPath);
+            FileUtil.renameTmpToFile(tmpPath, path);
         }
     }
     /**

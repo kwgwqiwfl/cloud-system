@@ -11,20 +11,38 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
-public class OkProxyPostKeyword extends OkProxyBase {
+public class OkHttpSimpleClient {
 
     private static final int CONNECT_TIMEOUT = 3000;
     private static final int READ_TIMEOUT = 8500;
+
+    private static final Headers BROWSER_HEADERS;
+    static {
+        BROWSER_HEADERS = Headers.of(
+                "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
+                "Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+                "Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8",
+                "Accept-Encoding", "gzip, deflate, br",
+                "Connection", "close",
+                "Upgrade-Insecure-Requests", "1",
+                "Sec-Fetch-Dest", "document",
+                "Sec-Fetch-Mode", "navigate",
+                "Sec-Fetch-Site", "none",
+                "Sec-Fetch-User", "?1",
+                "DNT", "1",
+                "Cache-Control", "max-age=0",
+                "sec-ch-ua", "\"Not(A:Brand\";v=\"99\", \"Google Chrome\";v=\"133\", \"Chromium\";v=\"133\"",
+                "sec-ch-ua-mobile", "?0",
+                "sec-ch-ua-platform", "\"Windows\"",
+                "Accept-CH", "Sec-CH-UA, Sec-CH-UA-Mobile, Sec-CH-UA-Platform"
+        );
+    }
 
     private OkHttpClient okHttpClient;
 
@@ -46,76 +64,63 @@ public class OkProxyPostKeyword extends OkProxyBase {
             };
             sslContext.init(null, trustAllCerts, new SecureRandom());
 
-            OkHttpClient.Builder baseBuilder = new OkHttpClient.Builder()
+            OkHttpClient.Builder builder = new OkHttpClient.Builder()
                     .connectTimeout(CONNECT_TIMEOUT, TimeUnit.MILLISECONDS)
                     .readTimeout(READ_TIMEOUT, TimeUnit.MILLISECONDS)
                     .writeTimeout(READ_TIMEOUT, TimeUnit.MILLISECONDS)
                     .sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0])
                     .hostnameVerifier((hostname, session) -> true)
                     .connectionPool(new ConnectionPool(300, 10, TimeUnit.SECONDS))
-                    .proxySelector(new DynamicProxySelector())
                     .followRedirects(true)
                     .followSslRedirects(true)
                     .retryOnConnectionFailure(false)
                     .cookieJar(CookieJar.NO_COOKIES);
 
-            okHttpClient = baseBuilder.build();
+            okHttpClient = builder.build();
 
         } catch (Exception e) {
-            log.error("OkHttp POST 初始化失败", e);
+            log.error("OkHttp 初始化失败", e);
         }
     }
 
-    public String doProxyPostRequest(String proxyHost, int proxyPort, String requestUrl, String jsonBody, String token) {
+    /**
+     * 纯GET请求，无任何代理逻辑
+     */
+    public String doGetRequest(String requestUrl, String token) {
         try {
-            if (StringUtils.isNotBlank(proxyHost) && proxyPort > 0) {
-                PROXY_THREAD_LOCAL.set(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)));
-            }
-
-            Request.Builder builder = new Request.Builder().url(requestUrl);
-            setSiteHeaders(builder, requestUrl);
+            Request.Builder builder = new Request.Builder()
+                    .url(requestUrl)
+                    .headers(BROWSER_HEADERS);
 
             if (StringUtils.isNotBlank(token)) {
                 builder.header("Authorization", "Bearer " + token);
             }
-
-            // 正确顺序 OkHttp3
-            RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonBody);
-            builder.post(body);
-
             Request request = builder.build();
+
             smartSleep(requestUrl);
 
             try (Response response = okHttpClient.newCall(request).execute()) {
                 if (!response.isSuccessful()) {
                     throw new IOException("request_failed");
                 }
-                byte[] bodyBytes = response.body() != null ? response.body().bytes() : new byte[0];
-                String encoding = response.header("Content-Encoding", "");
-                Charset charset = StandardCharsets.UTF_8;
-                return HttpUtils.keywordDecompress(bodyBytes, encoding, charset);
+                byte[] body = response.body() != null ? response.body().bytes() : new byte[0];
+                return HttpUtils.safeDecompress(body);
             }
 
         } catch (Exception e) {
-            log.debug("POST代理请求失败 url:{}", requestUrl, e);
+            log.debug("请求失败 url:{}", requestUrl, e);
             throw new IllegalArgumentException("request_failed", e);
-        } finally {
-            PROXY_THREAD_LOCAL.remove();
-        }
-    }
-
-    private void setSiteHeaders(Request.Builder builder, String url) {
-        builder.headers(HttpUtils.COMMON);
-        if (url.contains("qbbusi.html5.qq.com")) {
-            builder.headers(HttpUtils.SOGOU);
         }
     }
 
     private static void smartSleep(String url) {
         try {
-            Thread.sleep(60 + ThreadLocalRandom.current().nextInt(90));
+            if (url.contains("......com")) {
+                Thread.sleep(20 + ThreadLocalRandom.current().nextInt(40));
+            }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
     }
+
 }

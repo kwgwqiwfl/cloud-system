@@ -4,20 +4,18 @@ import com.ring.cloud.facade.common.TaskTypeEnum;
 import com.ring.cloud.facade.entity.ip.PangIpData;
 import com.ring.cloud.facade.entity.ip.TaskEntity;
 import com.ring.cloud.facade.entity.proxy.ProxyIp;
-import com.ring.cloud.facade.execute.IpDomain.impl.IpSegExecutor;
 import com.ring.cloud.facade.process.ip.StopCondition;
 import com.ring.cloud.facade.process.metrics.AbstractTask;
 import com.ring.cloud.facade.util.FileUtil;
 import com.ring.cloud.facade.util.IpUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Component
@@ -34,97 +32,105 @@ public class IpPangTask extends AbstractTask<TaskEntity> implements StopConditio
     // ========== ITask 接口实现 ==========
     @Override
     public boolean runTask(TaskEntity task) {
-        String uniqueKey = "ip_pang_task";
+        String uniqueKey = task.getTaskType() + ":thread_" + Thread.currentThread().getId();
         try {
             return batchCrawl(task, uniqueKey);
         } catch (Throwable e) {
-            log.error("分段任务失败："+e.getMessage(),e);
+            log.error("ip pang任务失败："+e.getMessage(),e);
             return false;
         }
     }
 
     // pang采集控制逻辑 - 主方法
     public boolean batchCrawl(TaskEntity task, String uniqueKey) throws IOException {
-        List<Integer> numList = task.getFileNoList();
+        int start = task.getStartPage();
+        int end = task.getEndPage();
+        // 文件 start + "-" + end
+        String csvPath = ipPangPath + "/" + start + "-" + end + ".csv";
+        String tmpPath = csvPath + ".tmp";
+        FileUtil.forceCreateFile(tmpPath);
+        final BufferedWriter bw = initBufferedWriter(tmpPath);
 
-        // 初始化文件（用第一个seg编号做输出文件名）
-        String csvPath = ipPangPath + "/" + numList.get(0) + ".csv";
-        String tmpCsvPath = csvPath + ".tmp";
-        FileUtil.forceCreateFile(tmpCsvPath);
-        final BufferedWriter bw = initBufferedWriter(tmpCsvPath);
+        String errorTxtPath = ipPangPath + "/" + start + "-" + end + "-error.txt";
+        String errorTmpPath = errorTxtPath + ".tmp";
+        FileUtil.forceCreateFile(errorTmpPath);
+        final BufferedWriter errorBw = initBufferedWriter(errorTmpPath);
 
         try {
             // 执行采集逻辑
-            return doBatchCrawl(numList, bw, uniqueKey);
+            return doBatchCrawl(start, end, bw, errorBw, uniqueKey);
         }catch (Exception e){
             log.error("任务失败，",e);
             return false;
         }finally {
             // 统一关闭文件
-            closeFileAndRenameByPath(bw, tmpCsvPath, csvPath, true);
+            closeFileAndRenameByPath(bw, tmpPath, csvPath, true);
+            closeFileAndRenameByPath(errorBw, errorTmpPath, errorTxtPath, true);
         }
     }
 
     /**
      * 批量采集IP段任务执行器
      */
-    private boolean doBatchCrawl(List<Integer> numList, BufferedWriter bw, String uniqueKey) throws Exception {
+    private boolean doBatchCrawl(int start, int end, BufferedWriter bw, BufferedWriter errorBw, String uniqueKey) throws Exception {
         // 前置参数校验
-        if (numList == null || numList.isEmpty() || bw == null) {
+        if (start < 0 || end < 0 || end > 255 || start > end || bw == null || errorBw == null) {
             log.warn("任务[{}]参数异常，终止执行", uniqueKey);
             return false;
         }
+        ProxyIp currentProxy = getAvailableProxy();
+        StringBuilder sb = new StringBuilder(128);
+        long totalAllErr = 0;
+        long totalAllSucc = 0;
 
-        ProxyIp proxyIp = getAvailableProxy();
-        int lastIndex = numList.size() - 1;
-        String currentIpSegment = String.format("%d.0.0.0", numList.get(0));
-        String endIpSegment = String.format("%d.255.255.0", numList.get(lastIndex));
+        for (int i = start; i <= end; i++) {
+            Set<String> ipSet = IpUtil.ipSegSetByNum(i);
+            int totalSeg = ipSet.size(); // 实际剩余有效IP(剔除内网后≠65536)
+            long segSucc = 0;
+            long segErr = 0;
+            log.info("任务[{}]开始处理网段首段：{}，本段待处理IP总数：{}", uniqueKey, i, totalSeg);
 
-        // 批量写入缓冲
-        List<String> dataBuffer = new ArrayList<>(FLUSH_BATCH_SIZE);
-        while (!isTaskStopped(uniqueKey) && !ipExceedStop(currentIpSegment, endIpSegment)) {
-            List<PangIpData> pangIpList = fetchPangIpWithRetry(currentIpSegment, proxyIp);
-
-            if (pangIpList.isEmpty()) {
-                log.debug("任务[{}]当前IP段{}无数据，跳过", uniqueKey, currentIpSegment);
-                currentIpSegment = IpUtil.nextSegmentIp(currentIpSegment);
-                continue;
+            for (String segIp : ipSet) {
+                List<PangIpData> pangIpList = queryWithRetry(
+                        segIp,
+                        currentProxy,
+                        3,
+                        pangIpServcie::pangIpCountNoRetry,
+                        null
+                );
+                // 接口无数据=失败
+                if (pangIpList == null || pangIpList.isEmpty()) {
+                    log.info(segIp+"----null");
+                    errorBw.write(segIp);
+                    errorBw.newLine();
+                    segErr++;
+                    continue;
+                }
+                sb.setLength(0);
+                for (PangIpData pangIpData : pangIpList) {
+                    log.info(segIp+"----"+pangIpList.size());
+                    if (sb.length() > 0) {
+                        sb.append("\n");
+                    }
+                    sb.append(pangIpData.getIp()).append(",").append(pangIpData.getCount());
+                }
+                bw.write(sb.toString());
+                bw.newLine();
+                segSucc++;
             }
-
-            // 加入缓冲
-            for (PangIpData data : pangIpList) {
-                dataBuffer.add(data.getIp() + "," + data.getCount());
-            }
-
-            // 达到批量大小，一次性写入
-            if (dataBuffer.size() >= FLUSH_BATCH_SIZE) {
-                batchWrite(bw, dataBuffer);
-                bw.flush();
-            }
-
-            // 切换下一段
-            currentIpSegment = IpUtil.nextSegmentIp(currentIpSegment);
+            // 单段结束刷缓冲区
+            bw.flush();
+            totalAllSucc += segSucc;
+            totalAllErr += segErr;
+            log.info("任务[{}]网段{}处理完成，本段总量:{}，成功:{}，失败:{}，成功率:{}%",
+                    uniqueKey, i, totalSeg, segSucc, segErr,
+                    totalSeg == 0 ? 0 : String.format("%.2f", segSucc * 100.0 / totalSeg));
         }
-
-        // 最后把缓冲里剩余的数据写入
-        if (!dataBuffer.isEmpty()) {
-            batchWrite(bw, dataBuffer);
-            dataBuffer.clear();
-        }
+        // 全部任务收尾落盘
+        bw.flush();
+        errorBw.flush();
+        log.info("任务[{}]全量处理完毕，区间[{}-{}]，总成功:{}，总失败:{}", uniqueKey, start, end, totalAllSucc, totalAllErr);
         return true;
-    }
-
-    /**
-     * 带重试获取Pang IP列表
-     */
-    private List<PangIpData> fetchPangIpWithRetry(String ipSegment, ProxyIp proxyIp) {
-        return queryWithRetry(
-                ipSegment,
-                proxyIp,
-                3,
-                pangIpServcie::pangIpCountNoRetry,
-                null
-        );
     }
 
     // ========== StopCondition 接口实现 ==========

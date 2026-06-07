@@ -11,6 +11,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.util.CollectionUtils;
 
+import java.io.BufferedWriter;
 import java.net.InetAddress;
 import java.util.*;
 
@@ -418,7 +419,21 @@ public class IpUtil {
         }
         return result;
     }
-
+    //根据第一段号获取当前段65535位ip段
+    public static Set<String> ipSegSetByNum(int segNo) {
+        Set<String> ipSet = new HashSet<>();
+        String last = ".0";
+        String s1 = String.valueOf(segNo);
+        for (int b = 0; b <= 255; b++) {
+            String s2 = s1 + "." + b;
+            for (int c = 0; c <= 255; c++) {
+                String ip = s2 + "." + c + last;
+                if(!isInternalIp(ip))
+                    ipSet.add(ip);
+            }
+        }
+        return ipSet;
+    }
     public static void main(String[] args) {
         List<IpSegment> list = generateIpSegments(1);
         System.out.println(list);

@@ -1,5 +1,6 @@
 package com.ring.cloud.facade.controller;
 
+import com.ring.cloud.facade.proxy.GlobalProxyHelper;
 import com.ring.cloud.facade.service.IpApiService;
 import com.ring.welkin.common.core.ml.MResponse;
 import io.swagger.annotations.Api;
@@ -43,5 +44,14 @@ public class IpApiController {
             log.error("ip查询归属地失败" + e.getMessage());
             return MResponse.error(400, "查询归属地失败：" + e.getMessage());
         }
+    }
+    @Autowired
+    protected GlobalProxyHelper globalProxyHelper;
+    @GetMapping("/testProxy")
+    @ApiOperation(value = "仅测试")
+    public MResponse<?> crawlTest1() {
+        log.info("abc");
+        globalProxyHelper.getAvailableProxy();
+        return MResponse.ok();
     }
 }

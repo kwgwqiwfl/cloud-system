@@ -1,12 +1,11 @@
 package com.ring.cloud.facade.support;
 
 import com.ring.cloud.facade.entity.proxy.ProxyIp;
+import com.ring.cloud.facade.frame.OkHttpSimpleClient;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,8 +14,10 @@ import java.util.stream.Stream;
 @Slf4j
 @Component
 public class ProxyApiClient {
+//    @Autowired
+//    protected RestTemplate restTemplate;
     @Autowired
-    protected RestTemplate restTemplate;
+    protected OkHttpSimpleClient okHttpSimpleClient;
 
     @Value("${ml.client.proxy.url:null}")
     private String proxyUrl;
@@ -29,12 +30,17 @@ public class ProxyApiClient {
     }
 
     private List<ProxyIp> doGetProxyIpList() {
-        String proxyStr = restTemplate.getForObject(proxyUrl, String.class);
-        if (StringUtils.isEmpty(proxyStr) || !proxyStr.contains(":")) {
-            throw new IllegalArgumentException("代理IP格式不正确：" + proxyStr);
+//        String proxyStr = restTemplate.getForObject(proxyUrl, String.class);
+
+        String content = okHttpSimpleClient.doGetRequest(proxyUrl, "");
+        if (content == null || content.trim().isEmpty())
+            throw new IllegalArgumentException("返回内容为空");
+
+        if (!content.contains(":")) {
+            throw new IllegalArgumentException("返回代理IP格式不正确：" + content);
         }
         //解析ip 字符串形式
-        return Stream.of(proxyStr.split("\\n"))
+        return Stream.of(content.split("\\n"))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .map(ipPort -> {

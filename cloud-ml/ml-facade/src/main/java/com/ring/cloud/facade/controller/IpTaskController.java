@@ -93,19 +93,6 @@ public class IpTaskController {
         return MResponse.ok(ipService.getIpProgress(targetIp));
     }
 
-    @GetMapping("/test")
-    @ApiOperation(value = "仅测试")
-    public MResponse<?> crawlTest1() {
-        log.info("abc");
-        return MResponse.ok();
-    }
-
-    @PostMapping("/crawlByFactors")
-    @ApiOperation(value = "获取ip列表")
-    public MResponse<?> crawlByFactors(@RequestBody @NotNull List<String> rankList) {
-        return MResponse.ok();
-    }
-
     @PostMapping("/patchInsertTmp")
     @ApiOperation(value = "导入文件到临时表")
     public MResponse<?> patchInsertTmp(@RequestBody @NotNull IpImport ipImport) {
@@ -133,4 +120,5 @@ public class IpTaskController {
         ipService.pangIp(start, end);
         return MResponse.ok("启动成功");
     }
+
 }

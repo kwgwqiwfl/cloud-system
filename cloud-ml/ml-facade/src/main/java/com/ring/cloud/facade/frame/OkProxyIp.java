@@ -1,5 +1,6 @@
 package com.ring.cloud.facade.frame;
 
+import com.ring.cloud.facade.util.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.apache.commons.lang3.StringUtils;
@@ -115,7 +116,7 @@ public class OkProxyIp extends OkProxyBase {
                     throw new IOException("request_failed");
                 }
                 byte[] body = response.body() != null ? response.body().bytes() : new byte[0];
-                return safeDecompress(body);
+                return HttpUtils.safeDecompress(body);
             }
 
         } catch (Exception e) {

@@ -15,10 +15,9 @@ public class TaskIdentity {
     private boolean keywordBatchTask;
     private boolean ipLoopBatchTask;
     private boolean domainSubBatchTask;
-    private boolean ipPangBatchTask;
 
     // ===== 统一判断：是否需要【全部线程跑完才释放锁】=====
     public boolean isNeedFinishAllRelease() {
-        return largeIpTask || domainBatchTask || keywordBatchTask || ipLoopBatchTask || domainSubBatchTask || ipPangBatchTask;
+        return largeIpTask || domainBatchTask || keywordBatchTask || ipLoopBatchTask || domainSubBatchTask;
     }
 }

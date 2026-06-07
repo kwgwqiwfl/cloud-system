@@ -1,6 +1,6 @@
 package com.ring.cloud.facade.frame;
 
-import com.ring.cloud.facade.util.HttpHeaderUtils;
+import com.ring.cloud.facade.util.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.apache.commons.lang3.StringUtils;
@@ -111,7 +111,7 @@ public class OkProxyKeyword extends OkProxyBase {
                 byte[] body = response.body() != null ? response.body().bytes() : new byte[0];
                 String encoding = response.header("Content-Encoding", "");
                 Charset charset = getCharsetByUrl(requestUrl);
-                return keywordDecompress(body, encoding, charset);
+                return HttpUtils.keywordDecompress(body, encoding, charset);
             }
 
         } catch (Exception e) {
@@ -126,21 +126,21 @@ public class OkProxyKeyword extends OkProxyBase {
     // 从工具类取头，代码极干净
     // ======================
     private void setSiteHeaders(Request.Builder builder, String url) {
-        builder.headers(HttpHeaderUtils.COMMON);
+        builder.headers(HttpUtils.COMMON);
         if (url.contains("baidu.com")) {
-            builder.headers(HttpHeaderUtils.BAIDU);
+            builder.headers(HttpUtils.BAIDU);
         } else if (url.contains("sug.so.360.cn")) {
-            builder.headers(HttpHeaderUtils.SO_COM);
+            builder.headers(HttpUtils.SO_COM);
         } else if (url.contains("cn.bing.com")) {
-            builder.headers(HttpHeaderUtils.BING);
+            builder.headers(HttpUtils.BING);
         } else if (url.contains("yandex.com")) {
-            builder.headers(HttpHeaderUtils.YANDEX);
+            builder.headers(HttpUtils.YANDEX);
         } else if (url.contains("suggestqueries.google.com")) {
-            builder.headers(HttpHeaderUtils.GOOGLE);
+            builder.headers(HttpUtils.GOOGLE);
         } else if (url.contains("qbbusi.html5.qq.com")) {
-            builder.headers(HttpHeaderUtils.SOGOU);
+            builder.headers(HttpUtils.SOGOU);
         } else if (url.contains("www.bing.com")) {
-            builder.headers(HttpHeaderUtils.BING_INT);
+            builder.headers(HttpUtils.BING_INT);
         }
     }
 

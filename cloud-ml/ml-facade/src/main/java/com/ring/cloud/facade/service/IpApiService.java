@@ -70,7 +70,7 @@ public class IpApiService extends SeaCommon {
                     } catch (Exception e) {
                         if (retry == MAX_RETRY) {
                             log.error("IP={} 第{}页达到最大重试次数，停止查询", ip, currentPage, e);
-                            break;
+                            throw new IllegalArgumentException("第"+currentPage+"页重试3次查询失败！");
                         }
                         log.warn("IP={} 第{}页查询失败，{}ms后重试", ip, currentPage, RETRY_DELAY_MS);
                         try {
@@ -151,6 +151,9 @@ public class IpApiService extends SeaCommon {
 
         } catch (Exception e) {
             log.error("IP={} 查询异常", ip, e);
+            if (writer != null) {
+                try { writer.close(); } catch (IOException ignored) {}
+            }
             FileUtil.deleteTmpFile(tmpFilePath);
             throw new IllegalArgumentException(e.getMessage());
         } finally {

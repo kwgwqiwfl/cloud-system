@@ -87,8 +87,8 @@ public class IpLoopTask extends AbstractTask<TaskEntity> implements StopConditio
             long totalCount = processFileIpList(fileNo, ipList, breakpoint, bw, currentProxy, uniqueKey);
 
             // 日志 & 推送
-            log.info("文件编号：{} -- 处理IP数：{} -- 采集成功数：{}", fileNo, ipList.size(), totalCount);
-            WsUtil.push(WsMessageType.LOOP_TASK, "文件编号："+ fileNo+" -- 处理IP数："+ipList.size()+" -- 成功："+totalCount);
+            log.info("文件编号：{} -- IP个数：{} -- 结果：{}", fileNo, ipList.size(), totalCount);
+            WsUtil.push(WsMessageType.LOOP_TASK, "文件编号："+ fileNo+" -- IP个数："+ipList.size()+" -- 结果："+totalCount);
         }
 
         return true;
